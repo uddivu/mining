@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Drop Stars Mining</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { background: radial-gradient(circle, #1a1a1a 0%, #000 100%); color: #fff; font-family: sans-serif; text-align: center; margin: 0; overflow: hidden; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .score { font-size: 60px; font-weight: bold; margin-bottom: 20px; color: #ffca28; text-shadow: 0 0 20px rgba(255, 202, 40, 0.5); }
+        .star-button { background: none; border: none; outline: none; cursor: pointer; transition: transform 0.1s; -webkit-tap-highlight-color: transparent; }
+        .star-button:active { transform: scale(0.85); }
+        .star-button img { width: 250px; filter: drop-shadow(0 0 30px #ffca28); }
+        .info { margin-top: 20px; font-size: 18px; opacity: 0.6; }
+    </style>
+</head>
+<body>
+    <div class="score" id="score">0</div>
+    <button class="star-button" onclick="mine()">
+        <img src="https://telegram.org/img/emoji/40/2B50.png" alt="Star">
+    </button>
+    <div class="info">КЛИКАЙ НА ЗВЕЗДУ!</div>
+
+    <script>
+        let count = 0;
+        const scoreEl = document.getElementById('score');
+        const webapp = window.Telegram.WebApp;
+        webapp.expand();
+        webapp.ready();
+
+        function mine() {
+            count++;
+            scoreEl.innerText = count;
+            if (webapp.HapticFeedback) {
+                webapp.HapticFeedback.impactOccurred('medium');
+            }
+        }
+    </script>
+</body>
+</html>
