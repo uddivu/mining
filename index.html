@@ -3,314 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Drop Stars Mining Platform</title>
+    <title>Drop Stars Pro</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        /* БАЗОВЫЕ СТИЛИ ДЛЯ СОЛИДНОГО ВИДА */
         :root {
-            --bg-color: #0d0d0d;
-            --text-color: #ffffff;
-            --sub-text-color: #888888;
-            --accent-color: #00ff88;
-            --card-bg: #1a1a1a;
-            --card-border: #2a2a2a;
-            --button-bg: #ffffff;
-            --button-text: #000000;
+            --bg: #000;
+            --card: #111;
+            --accent: #00ff88;
+            --text: #fff;
+            --sub: #888;
         }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            text-align: center;
-            overflow-x: hidden;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            /* Плавный скролл */
-            scroll-behavior: smooth;
-        }
-
-        /* ОСНОВНОЙ КОНТЕЙНЕР */
-        .main-container {
-            padding: 20px 15px 100px 15px; /* Паддинг снизу для навигации */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        /* ШАПКА ПРИЛОЖЕНИЯ */
-        .header {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-        .app-title { font-size: 20px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
-        .user-avatar { width: 32px; height: 32px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; }
-
-        /* ГЛАВНАЯ КАРТОЧКА БАЛАНСА */
-        .balance-card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 24px;
-            width: 90%;
-            padding: 25px;
-            margin-bottom: 25px;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-        .balance-label { font-size: 14px; color: var(--sub-text-color); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
-        .balance-value { font-size: 56px; font-weight: 900; color: var(--text-color); margin-bottom: 15px; letter-spacing: -2px; cursor: pointer; }
-        .mining-status { display: flex; align-items: center; justify-content: center; font-size: 14px; }
-        .status-dot { width: 8px; height: 8px; background-color: var(--accent-color); border-radius: 50%; margin-right: 8px; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-
-        /* СЕТКА ДЕЙСТВИЙ (КНОПКИ) */
-        .actions-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            width: 100%;
-            margin-bottom: 30px;
-        }
-        .action-btn {
-            background-color: var(--button-bg);
-            color: var(--button-text);
-            border: none;
-            padding: 18px;
-            border-radius: 16px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: transform 0.1s, opacity 0.1s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .action-btn:active { transform: scale(0.97); opacity: 0.9; }
-        .action-btn.secondary { background-color: var(--card-bg); color: #888; border: 1px solid var(--card-border); }
-        .icon { font-size: 18px; margin-right: 10px; }
-
-        /* КАРТОЧКИ СТАТИСТИКИ И РЕФЕРАЛОВ */
-        .info-section { width: 100%; text-align: left; }
-        .section-title { font-size: 18px; font-weight: 700; margin-bottom: 15px; padding-left: 5px; color: var(--sub-text-color); }
+        body { background: var(--bg); color: var(--text); font-family: sans-serif; margin: 0; padding: 15px; user-select: none; }
         
-        .stat-card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .stat-group { display: flex; flex-direction: column; }
-        .stat-label { font-size: 12px; color: var(--sub-text-color); text-transform: uppercase; margin-bottom: 5px; }
-        .stat-value { font-size: 22px; font-weight: 800; }
+        /* КАРТОЧКА МАЙНИНГА */
+        .mining-box { background: var(--card); border-radius: 24px; padding: 20px; margin-bottom: 20px; border: 1px solid #222; }
+        .label { color: var(--sub); font-size: 12px; text-transform: uppercase; }
+        .main-val { font-size: 42px; font-weight: bold; margin: 10px 0; }
+        .power-info { color: var(--accent); font-size: 14px; font-weight: bold; }
         
-        /* НИЖНЯЯ НАВИГАЦИЯ (FOOTER) - ДЛЯ ЧЕТКОСТИ */
-        .footer-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background-color: rgba(13, 13, 13, 0.95);
-            backdrop-filter: blur(10px);
-            border-top: 1px solid var(--card-border);
-            display: flex;
-            justify-content: space-around;
-            padding: 15px 10px;
-            z-index: 1000;
-        }
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: var(--sub-text-color);
-            font-size: 10px;
-            text-transform: uppercase;
-            font-weight: 600;
-            cursor: pointer;
-            transition: color 0.2s;
-        }
-        .nav-item.active { color: var(--accent-color); }
-        .nav-icon { font-size: 20px; margin-bottom: 5px; }
+        /* КНОПКА СБОРА */
+        .collect-btn { background: var(--accent); color: #000; border: none; width: 100%; padding: 12px; border-radius: 12px; font-weight: bold; margin-top: 15px; cursor: pointer; }
+        .collect-btn:disabled { background: #222; color: #555; cursor: not-allowed; }
 
-        /* ВНУТРЕННЕЕ МЕНЮ ШОПА (КРАСИВОЕ) */
-        #shop-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 10000; animation: fadeIn 0.3s; }
-        #shop-menu { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card-bg); padding: 30px 20px; border-top: 3px solid #333; border-radius: 30px 30px 0 0; z-index: 10001; text-align: left; animation: slideUp 0.3s; }
+        /* БАЛАНС ВЫВОДА */
+        .wallet-box { display: flex; justify-content: space-between; align-items: center; background: #1a1a1a; padding: 15px; border-radius: 16px; margin-bottom: 20px; }
+        .wallet-val { font-size: 20px; font-weight: bold; }
+
+        /* ИСТОРИЯ И МОЩНОСТИ */
+        .tabs { display: flex; gap: 10px; margin-bottom: 15px; }
+        .tab { color: var(--sub); font-size: 14px; font-weight: bold; padding-bottom: 5px; border-bottom: 2px solid transparent; }
+        .tab.active { color: var(--text); border-bottom-color: var(--accent); }
         
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .list-item { background: #0a0a0a; border: 1px solid #1a1a1a; padding: 12px; border-radius: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .item-info { text-align: left; }
+        .item-title { font-size: 14px; font-weight: bold; }
+        .item-date { font-size: 11px; color: var(--sub); }
+        .item-amount { color: var(--accent); font-weight: bold; }
 
-        .shop-title { font-size: 24px; font-weight: 900; margin-bottom: 20px; }
-        .shop-item { background: #222; padding: 18px; border-radius: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--card-border); cursor: pointer; }
-        .shop-item:active { background: #2a2a2a; }
-        .item-text { display: flex; flex-direction: column; }
-        .item-name { font-size: 16px; font-weight: 700; }
-        .item-desc { font-size: 12px; color: var(--sub-text-color); margin-top: 3px; }
-        .item-price { color: var(--accent-color); font-weight: 800; font-size: 16px; }
-        .close-shop-btn { background: #333; color: #fff; border: none; padding: 12px; border-radius: 10px; font-size: 14px; margin-top: 15px; width: 100%; cursor: pointer; }
+        /* КНОПКИ ДЕЙСТВИЯ */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .btn { background: #fff; color: #000; border: none; padding: 15px; border-radius: 12px; font-weight: bold; font-size: 15px; }
+        .btn.black { background: #1a1a1a; color: #fff; border: 1px solid #333; }
 
+        /* МЕНЮ МАГАЗИНА */
+        #shop { display:none; position:fixed; bottom:0; left:0; right:0; background:#111; padding:25px; border-top:2px solid #333; border-radius:25px 25px 0 0; z-index:100; text-align:left; }
+        .shop-opt { background:#222; padding:15px; border-radius:15px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; }
     </style>
 </head>
 <body>
 
-    <div class="main-container">
-        
-        <div class="header">
-            <div class="app-title">Drop Stars</div>
-            <div class="user-avatar" id="user-avatar">?</div>
-        </div>
-
-        <div class="balance-card">
-            <div class="balance-label">Мой Баланс</div>
-            <div class="balance-value" id="balance" onclick="tg.showAlert('Майнинг активен! Баланс обновляется ежесекундно.')">0.000000</div>
-            <div class="mining-status">
-                <div class="status-dot"></div>
-                <div id="mining-power" style="color: var(--accent-color); font-weight: bold;">● 1.25 TH/s Active</div>
-            </div>
-        </div>
-
-        <div class="actions-grid">
-            <button class="action-btn" onclick="openShop()">
-                <span class="icon">🚀</span> УСКОРИТЬ
-            </button>
-            <button class="action-btn secondary" onclick="tg.showAlert('Минимальный вывод — 10 USDT. У вас пока недостаточно средств.')">
-                <span class="icon">💳</span> ВЫВОД
-            </button>
-        </div>
-
-        <div class="info-section">
-            <div class="section-title">Общая Статистика</div>
-            
-            <div class="stat-card">
-                <div class="stat-group">
-                    <span class="stat-label">Юзеров</span>
-                    <span class="stat-value">4,281</span>
-                </div>
-                <span style="font-size: 24px;">👥</span>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-group">
-                    <span class="stat-label">Всего выплачено</span>
-                    <span class="stat-value" style="color: var(--accent-color);">1,150 USDT</span>
-                </div>
-                <span style="font-size: 24px;">💰</span>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-group">
-                    <span class="stat-label">Доступно для Вывода</span>
-                    <span class="stat-value">0.00 USDT</span>
-                </div>
-                <span style="font-size: 24px;">🔒</span>
-            </div>
-        </div>
-
+    <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+        <span style="font-weight:bold; letter-spacing:1px;">DROP STARS PRO</span>
+        <span id="user-name" style="color:var(--sub);">User</span>
     </div>
 
-    <div class="footer-nav">
-        <div class="nav-item active" onclick="tg.showAlert('Главная страница майнинга')">
-            <span class="nav-icon">⚒️</span> ГЛАВНАЯ
+    <div class="wallet-box">
+        <div>
+            <div class="label">Баланс вывода</div>
+            <div class="wallet-val"><span id="w-bal">0.00</span> USDT</div>
         </div>
-        <div class="nav-item" onclick="tg.showAlert('Вкладка рефералов в разработке')">
-            <span class="nav-icon">🤝</span> ДРУЗЬЯ
-        </div>
-        <div class="nav-item" onclick="tg.showAlert('Вкладка заданий в разработке')">
-            <span class="nav-icon">🏆</span> КВЕСТЫ
+        <button class="btn" style="padding:10px 20px; width:auto;" onclick="tg.showAlert('Минимум для вывода: 10 USDT')">ВЫВОД</button>
+    </div>
+
+    <div class="mining-box">
+        <div class="label">Намайнено (Mining)</div>
+        <div class="main-val" id="m-bal">0.000000</div>
+        <div class="power-info">⚡️ Скорость: <span id="current-power">1.25</span> TH/s</div>
+        <button class="collect-btn" id="collect-btn" onclick="collect()" disabled>СОБРАТЬ (МИН. 1 USDT)</button>
+    </div>
+
+    <div class="grid">
+        <button class="btn" onclick="openShop()">🚀 УСКОРИТЬ</button>
+        <button class="btn black" onclick="tg.showAlert('История пуста')">📜 ИСТОРИЯ</button>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active">АКТИВНЫЕ МОЩНОСТИ</div>
+    </div>
+    
+    <div id="power-list">
+        <div class="list-item">
+            <div class="item-info">
+                <div class="item-title">Базовая мощность</div>
+                <div class="item-date">Выдано при регистрации</div>
+            </div>
+            <div class="item-amount">1.25 TH/s</div>
         </div>
     </div>
 
-    <div id="shop-overlay" onclick="closeShop()"></div>
-    <div id="shop-menu" style="display:none;">
-        <div class="shop-title">Повышение Мощности 🚀</div>
-        
-        <div class="shop-item" onclick="buy('10_usdt')">
-            <div class="item-text">
-                <span class="item-name">👑 VIP ПАКЕТ</span>
-                <span class="item-desc">+15.00 TH/s навсегда</span>
-            </div>
-            <div class="item-price">10 USDT</div>
+    <div id="shop">
+        <h3 style="margin-top:0;">Купить мощность 🚀</h3>
+        <p style="color:var(--sub); font-size:12px; margin-bottom:20px;">Оплата в TON/USDT через Crypto Bot. Мощность зачисляется сразу.</p>
+        <div class="shop-opt" onclick="buy()">
+            <div><b>VIP ПАКЕТ</b><br><small style="color:var(--sub);">+15.00 TH/s</small></div>
+            <div class="item-amount">10 USDT</div>
         </div>
-        
-        <div class="shop-item" onclick="buy('5_usdt')">
-            <div class="item-text">
-                <span class="item-name">🔥 СТАНДАРТ</span>
-                <span class="item-desc">+7.00 TH/s навсегда</span>
-            </div>
-            <div class="item-price">5 USDT</div>
+        <div class="shop-opt" onclick="buy()">
+            <div><b>СТАНДАРТ</b><br><small style="color:var(--sub);">+7.00 TH/s</small></div>
+            <div class="item-amount">5 USDT</div>
         </div>
-        
-        <div class="shop-item" onclick="buy('1_usdt')">
-            <div class="item-text">
-                <span class="item-name">💎 ЭКОНОМ</span>
-                <span class="item-desc">+1.25 TH/s навсегда</span>
-            </div>
-            <div class="item-price">1 USDT</div>
-        </div>
-        
-        <button class="close-shop-btn" onclick="closeShop()">ЗАКРЫТЬ</button>
+        <button class="btn black" style="width:100%;" onclick="closeShop()">ЗАКРЫТЬ</button>
     </div>
 
     <script>
-        // ИНИЦИАЛИЗАЦИЯ TELEGRAM WEB APP API
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Развернуть на весь экран
-        tg.enableClosingConfirmation(); // Подтверждение при закрытии
-        
-        // Получаем имя юзера (если есть)
-        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            const user = tg.initDataUnsafe.user;
-            const avatar = document.getElementById('user-avatar');
-            if (user.first_name) {
-                avatar.innerText = user.first_name.charAt(0).toUpperCase();
-            }
-        }
+        tg.expand();
 
-        // ЛОГИКА БАЛАНСА И МАЙНИНГА
-        let bal = parseFloat(localStorage.getItem('m_bal')) || 0.000000;
-        const balanceElement = document.getElementById('balance');
+        // Данные
+        let miningBal = parseFloat(localStorage.getItem('m_bal')) || 0;
+        let walletBal = parseFloat(localStorage.getItem('w_bal')) || 0;
+        let power = 1.25;
 
+        // Таймер майнинга
         setInterval(() => {
-            bal += 0.000001;
-            balanceElement.innerText = bal.toFixed(6);
-            localStorage.setItem('m_bal', bal);
+            miningBal += (power * 0.000001);
+            document.getElementById('m-bal').innerText = miningBal.toFixed(6);
+            localStorage.setItem('m_bal', miningBal);
+
+            // Активация кнопки сбора
+            const btn = document.getElementById('collect-btn');
+            if(miningBal >= 1) {
+                btn.disabled = false;
+                btn.innerText = "СОБРАТЬ НА БАЛАНС ВЫВОДА";
+            } else {
+                btn.disabled = true;
+                btn.innerText = "СОБРАТЬ (МИН. 1 USDT)";
+            }
         }, 1000);
 
-        // Управление Магазином
-        const shopOverlay = document.getElementById('shop-overlay');
-        const shopMenu = document.getElementById('shop-menu');
-
-        function openShop() {
-            shopOverlay.style.display = 'block';
-            shopMenu.style.display = 'block';
+        function collect() {
+            walletBal += miningBal;
+            miningBal = 0;
+            document.getElementById('w-bal').innerText = walletBal.toFixed(2);
+            localStorage.setItem('w_bal', walletBal);
+            localStorage.setItem('m_bal', miningBal);
+            tg.showAlert('Средства успешно переведены на баланс вывода!');
         }
 
-        function closeShop() {
-            shopOverlay.style.display = 'none';
-            shopMenu.style.display = 'none';
+        function openShop() { document.getElementById('shop').style.display = 'block'; }
+        function closeShop() { document.getElementById('shop').style.display = 'none'; }
+
+        function buy() {
+            tg.openTelegramLink("http://t.me/send?start=IVubelJ5G9NB");
+            closeShop();
         }
 
-        function buy(plan) {
-            // Твоя проверенная рабочая ссылка на оплату
-            const paymentLink = "http://t.me/send?start=IVubelJ5G9NB";
-            
-            // Четкое сообщение перед переходом
-            tg.showConfirm(`Вы выбрали план мощности. Переходим к оплате в Crypto Bot?`, (confirm) => {
-                if (confirm) {
-                    tg.openTelegramLink(paymentLink);
-                }
-                // Плавное закрытие магазина
-                setTimeout(closeShop, 500);
-            });
-        }
+        document.getElementById('w-bal').innerText = walletBal.toFixed(2);
     </script>
 </body>
 </html>
