@@ -3,284 +3,252 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Drop Stars Mining Pro</title>
+    <title>Drop Stars Ultimate</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root {
-            --bg: #000;
-            --card: #121212;
-            --accent: #00ff88;
-            --text: #fff;
-            --sub: #888;
-            --border: #222;
-            --tab-bg: #0a0a0a;
-        }
+        :root { --bg: #000; --card: #111; --accent: #00ff88; --text: #fff; --sub: #888; --border: #222; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { background: var(--bg); color: var(--text); font-family: -apple-system, system-ui, sans-serif; margin: 0; padding: 0; overflow: hidden; }
-
-        /* Экраны */
-        .page { display: none; height: 100vh; padding: 20px 16px 100px 16px; overflow-y: auto; }
+        
+        .page { display: none; height: 100vh; padding: 20px 16px 110px; overflow-y: auto; }
         .page.active { display: block; }
 
-        /* Шапка */
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .logo { font-weight: 900; font-size: 20px; letter-spacing: 1px; color: #fff; }
-        .user-chip { background: var(--card); padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border); font-size: 13px; font-weight: 600; }
-
-        /* Карточки */
-        .card { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 20px; margin-bottom: 16px; position: relative; }
-        .label { color: var(--sub); font-size: 11px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 8px; }
-        .val-main { font-size: 38px; font-weight: 800; margin: 5px 0; letter-spacing: -1px; }
-        .val-sub { color: var(--sub); font-size: 14px; font-weight: 500; }
-
-        /* Кнопки */
-        .btn { border: none; border-radius: 18px; padding: 16px; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; }
-        .btn-primary { background: var(--text); color: var(--bg); }
+        /* Дизайн карточек и кнопок */
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 20px; margin-bottom: 15px; }
+        .label { color: var(--sub); font-size: 11px; text-transform: uppercase; font-weight: 700; margin-bottom: 8px; }
+        .val-main { font-size: 36px; font-weight: 800; letter-spacing: -1px; }
+        
+        .btn { border: none; border-radius: 18px; padding: 16px; font-size: 15px; font-weight: 700; cursor: pointer; width: 100%; transition: 0.2s; }
+        .btn-primary { background: #fff; color: #000; }
         .btn-accent { background: var(--accent); color: #000; }
-        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
-        .btn:active { transform: scale(0.97); }
-        .btn:disabled { background: #222; color: #555; }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: #fff; }
+        .btn:disabled { background: #222; color: #555; pointer-events: none; }
 
-        /* Мини-статистика */
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
-        .stat-box { background: var(--card); border: 1px solid var(--border); padding: 12px; border-radius: 16px; text-align: center; }
-        .stat-box span { display: block; font-size: 10px; color: var(--sub); text-transform: uppercase; margin-bottom: 4px; }
-        .stat-box b { font-size: 15px; font-variant-numeric: tabular-nums; }
-
-        /* Лента выплат */
-        .history-container { background: var(--card); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; }
-        .hist-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; border-bottom: 1px solid #1a1a1a; font-size: 13px; animation: slideIn 0.3s ease-out; }
-        .hist-name { font-weight: 600; }
-        .hist-name span { color: var(--sub); font-weight: 400; font-size: 11px; margin-left: 4px; }
-        .hist-val { color: var(--accent); font-weight: 800; }
-
-        /* Нижнее меню */
-        .tab-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--tab-bg); border-top: 1px solid var(--border); display: flex; padding: 10px 10px 25px 10px; z-index: 1000; }
-        .tab-item { flex: 1; text-align: center; color: var(--sub); font-size: 10px; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; }
-        .tab-item.active { color: var(--accent); }
-        .tab-icon { font-size: 20px; }
+        /* Специфичные блоки */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .stat-box { background: var(--card); border: 1px solid var(--border); padding: 12px; border-radius: 18px; text-align: center; }
+        
+        .history-box { background: var(--card); border: 1px solid var(--border); border-radius: 20px; min-height: 200px; }
+        .hist-item { display: flex; justify-content: space-between; padding: 12px 15px; border-bottom: 1px solid #1a1a1a; font-size: 13px; animation: fadeIn 0.5s; }
+        
+        /* Таб-бар */
+        .nav { position: fixed; bottom: 0; width: 100%; background: #080808; border-top: 1px solid var(--border); display: flex; padding: 10px 5px 25px; z-index: 100; }
+        .nav-item { flex: 1; text-align: center; font-size: 10px; color: var(--sub); font-weight: 700; cursor: pointer; }
+        .nav-item.active { color: var(--accent); }
 
         /* Квесты */
-        .quest-card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .quest-info h4 { margin: 0; font-size: 14px; }
-        .quest-info p { margin: 4px 0 0; font-size: 11px; color: var(--accent); font-weight: 600; }
+        .quest { display: flex; justify-content: space-between; align-items: center; background: #1a1a1a; padding: 15px; border-radius: 20px; margin-bottom: 10px; }
+        .quest-info b { font-size: 14px; display: block; }
+        .quest-info span { color: var(--accent); font-size: 12px; }
 
-        /* Оверлей Магазина */
-        #shop-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; padding: 20px; align-items: flex-end; }
-        .shop-sheet { background: #111; width: 100%; border-radius: 30px 30px 0 0; padding: 30px 20px; border-top: 2px solid var(--border); }
-        .shop-option { background: #1a1a1a; padding: 18px; border-radius: 20px; border: 1px solid var(--border); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
-
-        @keyframes slideIn { from { transform: translateY(-10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
     <div id="home" class="page active">
-        <div class="header">
-            <div class="logo">DROP STARS PRO</div>
-            <div class="user-chip" id="user-display">Miner</div>
-        </div>
-
         <div class="stats-grid">
-            <div class="stat-box"><span>В онлайне</span><b id="online-count">...</b></div>
-            <div class="stat-box"><span>Всего выплачено</span><b id="total-paid">1546.40</b></div>
+            <div class="stat-box"><span class="label">В онлайне</span><br><b id="online-count">...</b></div>
+            <div class="stat-box"><span class="label">Выплачено</span><br><b id="total-paid">...</b></div>
         </div>
 
         <div class="card">
-            <div class="label">Баланс вывода</div>
-            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
-                <div>
-                    <div class="val-main" id="w-bal">0.00</div>
-                    <div class="val-sub">Доступно: <span id="w-sub">0.00</span> USDT</div>
-                </div>
-                <button class="btn btn-primary" style="width: auto; padding: 10px 25px; border-radius: 14px;" onclick="tg.showAlert('Минимум для вывода: 10 USDT')">ВЫВОД</button>
+            <span class="label">Мой Баланс</span>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div class="val-main" id="w-bal">0.00</div>
+                <button class="btn btn-primary" style="width:auto; padding:10px 20px;" onclick="tg.showAlert('Минимум 10 USDT')">ВЫВОД</button>
             </div>
         </div>
 
         <div class="card" style="border-color: var(--accent);">
-            <div class="label" style="color: var(--accent);">Майнинг активен ● Живой процесс</div>
-            <div class="val-main" id="m-bal">0.000000</div>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #1a1a1a;">
-                <div style="background: rgba(0,255,136,0.1); color: var(--accent); padding: 5px 12px; border-radius: 10px; font-size: 12px; font-weight: 800;">⚡️ <span id="power-val">1.25</span> TH/s</div>
-                <div style="font-size: 11px; color: var(--sub);">Доход: ~0.12 USDT/день</div>
+            <div id="mining-status" style="color:var(--accent); font-size:12px; margin-bottom:10px;">МАЙНИНГ ОСТАНОВЛЕН</div>
+            <div class="val-main" id="m-bal" style="font-size:42px;">0.000000</div>
+            <div style="display:flex; justify-content:space-between; margin:15px 0;">
+                <div style="font-size:13px;">⚡️ <b id="p-val">1.25</b> TH/s</div>
+                <div style="font-size:11px; color:var(--sub)">До конца цикла: <span id="timer">24:00:00</span></div>
             </div>
-            <button class="btn btn-accent" id="claim-btn" onclick="collectProfit()" disabled style="margin-top: 15px;">Собрать от 1.00 USDT</button>
+            <button id="start-btn" class="btn btn-accent" onclick="startMining()">ЗАПУСТИТЬ МАЙНИНГ (24ч)</button>
+            <button id="collect-btn" class="btn btn-outline" style="margin-top:10px; display:none;" onclick="collect()">СОБРАТЬ ПРИБЫЛЬ</button>
         </div>
 
-        <button class="btn btn-outline" style="margin-bottom: 25px;" onclick="toggleShop(true)">🚀 УСКОРИТЬ МАЙНИНГ</button>
-
-        <div class="label">Последние выплаты</div>
-        <div class="history-container" id="history-box"></div>
+        <div class="label">Живая лента выплат</div>
+        <div class="history-box" id="payouts"></div>
     </div>
 
     <div id="friends" class="page">
-        <h2>Реферальная система</h2>
+        <h2>Рефералы</h2>
         <div class="card">
-            <div class="label">Ваш бонус</div>
-            <div class="val-main" style="font-size: 28px;">+10% от друзей</div>
-            <p style="color: var(--sub); font-size: 13px;">Получайте мощность за каждого приглашенного активного пользователя.</p>
+            <span class="label">Ваш бонус</span>
+            <div style="font-size:18px; font-weight:700;">+10% от пополнений друзей</div>
+            <div style="margin-top:10px; color:var(--sub); font-size:13px;">Начислено от друзей: <b style="color:#fff" id="ref-bonus">0.00</b> USDT</div>
         </div>
-        <div class="card">
-            <div class="label">Ваша ссылка</div>
-            <input type="text" id="ref-link" readonly value="t.me/DropStarsBot?start=ref123" style="width:100%; background:#000; border:1px solid #333; color:#fff; padding:12px; border-radius:10px; margin-bottom:10px;">
-            <button class="btn btn-primary" onclick="copyRef()">КОПИРОВАТЬ ССЫЛКУ</button>
-        </div>
-        <div class="label">Ваши рефералы (0)</div>
-        <div class="card" style="text-align: center; color: var(--sub);">Список пуст. Пригласите первого друга!</div>
+        <button class="btn btn-primary" onclick="copyLink()">ПРИГЛАСИТЬ ДРУГА</button>
+        <div class="label" style="margin-top:20px;">Ваши друзья (<span id="ref-count">0</span>)</div>
+        <div id="ref-list" class="card" style="text-align:center; color:var(--sub)">Пока никого нет</div>
     </div>
 
     <div id="quests" class="page">
-        <h2>Задания и бонусы</h2>
-        <div class="quest-card">
-            <div class="quest-info">
-                <h4>Подписка на канал</h4>
-                <p>+0.50 TH/s навсегда</p>
-            </div>
-            <button class="btn btn-primary" style="width:auto; padding:8px 15px;" onclick="tg.openTelegramLink('https://t.me/your_channel')">ВЫПОЛНИТЬ</button>
-        </div>
-        <div class="quest-card">
-            <div class="quest-info">
-                <h4>Пригласить 5 друзей</h4>
-                <p>+2.00 TH/s бонус</p>
-            </div>
-            <button class="btn btn-outline" style="width:auto; padding:8px 15px;">0 / 5</button>
-        </div>
+        <h2>Квесты</h2>
+        <div id="quest-list"></div>
     </div>
 
     <div id="profile" class="page">
-        <h2>Мой аккаунт</h2>
+        <h2>Профиль</h2>
         <div class="card">
-            <div class="label">ID Пользователя</div>
-            <div id="u-id">12345678</div>
+            <span class="label">Моя мощность</span>
+            <div class="val-main"><span id="p-total">1.25</span> TH/s</div>
+            <div style="color:var(--sub); font-size:12px; margin-top:5px;">Эквивалент: <span id="p-usd">10.00</span> USDT</div>
         </div>
-        <div class="card">
-            <div class="label">Текущая скорость</div>
-            <div class="val-main" style="font-size: 24px;"><span id="p-total">1.25</span> TH/s</div>
-        </div>
-        <button class="btn btn-outline" onclick="tg.showAlert('Поддержка: @admin_handle')">СЛУЖБА ПОДДЕРЖКИ</button>
+        <button class="btn btn-outline" onclick="tg.openTelegramLink('http://t.me/send?start=IVubelJ5G9NB')">КУПИТЬ МОЩНОСТЬ (1 USDT = 1.25 TH/s)</button>
     </div>
 
-    <div class="tab-bar">
-        <div class="tab-item active" onclick="showPage('home')"><span class="tab-icon">🏠</span>ГЛАВНАЯ</div>
-        <div class="tab-item" onclick="showPage('friends')"><span class="tab-icon">👥</span>ДРУЗЬЯ</div>
-        <div class="tab-item" onclick="showPage('quests')"><span class="tab-icon">🏆</span>КВЕСТЫ</div>
-        <div class="tab-item" onclick="showPage('profile')"><span class="tab-icon">👤</span>ПРОФИЛЬ</div>
-    </div>
-
-    <div id="shop-overlay" onclick="toggleShop(false)">
-        <div class="shop-sheet" onclick="event.stopPropagation()">
-            <h3 style="margin-top:0;">Купить мощность</h3>
-            <div class="shop-option" onclick="buy('VIP')">
-                <div><b>👑 VIP ПАКЕТ</b><br><small style="color:var(--sub)">+15.00 TH/s</small></div>
-                <b style="color:var(--accent)">10 USDT</b>
-            </div>
-            <div class="shop-option" onclick="buy('PRO')">
-                <div><b>🔥 PRO MINER</b><br><small style="color:var(--sub)">+7.00 TH/s</small></div>
-                <b style="color:var(--accent)">5 USDT</b>
-            </div>
-            <div class="shop-option" onclick="buy('START')">
-                <div><b>💎 START</b><br><small style="color:var(--sub)">+1.25 TH/s</small></div>
-                <b style="color:var(--accent)">1 USDT</b>
-            </div>
-            <button class="btn btn-outline" onclick="toggleShop(false)">ЗАКРЫТЬ</button>
-        </div>
-    </div>
+    <nav class="nav">
+        <div class="nav-item active" onclick="tab('home')">🏠<br>ГЛАВНАЯ</div>
+        <div class="nav-item" onclick="tab('friends')">👥<br>ДРУЗЬЯ</div>
+        <div class="nav-item" onclick="tab('quests')">🏆<br>КВЕСТЫ</div>
+        <div class="nav-item" onclick="tab('profile')">👤<br>ПРОФИЛЬ</div>
+    </nav>
 
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.enableClosingConfirmation();
+        const tg = window.Telegram.WebApp; tg.expand();
+        
+        let data = {
+            mBal: parseFloat(localStorage.getItem('m_bal')) || 0,
+            wBal: parseFloat(localStorage.getItem('w_bal')) || 0,
+            power: parseFloat(localStorage.getItem('power')) || 11.25, // 10 (пополнение) + 1.25 (старт)
+            tPaid: parseFloat(localStorage.getItem('t_paid')) || 1804.73,
+            refs: parseInt(localStorage.getItem('refs')) || 0,
+            miningEnd: parseInt(localStorage.getItem('m_end')) || 0,
+            quests: JSON.parse(localStorage.getItem('q_done')) || []
+        };
 
-        // Данные (LocalStorage для сохранения при перезаходе)
-        let mBal = parseFloat(localStorage.getItem('m_bal')) || 0;
-        let wBal = parseFloat(localStorage.getItem('w_bal')) || 0;
-        let tPaid = parseFloat(localStorage.getItem('t_paid')) || 1546.40;
-        let power = 1.25;
-
-        // Имена для ленты выплат
-        const names = ["Дмитрий", "Александр", "Ибрагим", "Мака", "Сергей", "Евгений", "Саркис", "Артем", "Никита", "Владимир", "Михаил", "Андрей", "Руслан", "Денис", "Виктор", "Максим"];
-        const surnames = ["К.", "М.", "В.", "Т.", "А.", "Б.", "С.", "Л.", "Р.", "Д."];
-
-        // Навигация
-        function showPage(id) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            event.currentTarget.classList.add('active');
-        }
-
-        // Онлайн
-        function updateOnline() {
+        // 1. УМНЫЙ ОНЛАЙН
+        function getOnline() {
             const h = new Date().getHours();
-            let min = (h > 8 && h < 23) ? 1200 : 600, max = (h > 8 && h < 23) ? 1500 : 800;
-            document.getElementById('online-count').innerText = Math.floor(Math.random() * (max - min) + min).toLocaleString();
+            if (h >= 23 || h < 6) return Math.floor(Math.random() * (600 - 230) + 230);
+            return Math.floor(Math.random() * (1200 - 600) + 600);
         }
-        setInterval(updateOnline, 10000); updateOnline();
+        function updateStats() {
+            document.getElementById('online-count').innerText = getOnline();
+            document.getElementById('total-paid').innerText = data.tPaid.toFixed(2);
+        }
+        setInterval(updateStats, 300000); updateStats();
 
-        // Лента выплат
-        function addPayment() {
-            const amt = parseFloat((Math.random() * (45 - 10) + 10).toFixed(2));
-            tPaid += amt;
-            document.getElementById('total-paid').innerText = tPaid.toFixed(2);
-            localStorage.setItem('t_paid', tPaid);
-
-            const user = names[Math.floor(Math.random()*names.length)] + " " + surnames[Math.floor(Math.random()*surnames.length)];
+        // 2. РЕАЛИСТИЧНЫЕ ВЫПЛАТЫ
+        const nicks = ["crypto_king88", "alex_invest", "maka_95", "user_777", "rich_vlad", "sol_pumper", "dmitry_v", "btc_lover", "fast_money", "ibra_top", "dark_soul", "moon_boy"];
+        function addPayout() {
+            const amt = (Math.random() * 30 + 10).toFixed(2);
+            data.tPaid += parseFloat(amt);
             const item = document.createElement('div');
             item.className = 'hist-item';
-            item.innerHTML = `<div class="hist-name">${user} <span>вывел</span></div><div class="hist-val">+${amt} USDT</div>`;
-            
-            const box = document.getElementById('history-box');
+            item.innerHTML = `<b>${nicks[Math.floor(Math.random()*nicks.length)]}</b> <span style="color:#888">вывел</span> <b style="color:var(--accent)">+${amt} USDT</b>`;
+            const box = document.getElementById('payouts');
             box.prepend(item);
-            if(box.children.length > 6) box.lastChild.remove();
+            if(box.children.length > 5) box.lastChild.remove();
             
-            setTimeout(addPayment, Math.random() * (40000 - 15000) + 15000);
+            let delay = (getOnline() > 800) ? (Math.random()*60000 + 30000) : (Math.random()*120000 + 60000);
+            setTimeout(addPayout, delay);
         }
-        addPayment();
+        addPayout();
 
-        // Майнинг
+        // 3. МАЙНИНГ 24 ЧАСА
+        function startMining() {
+            data.miningEnd = Date.now() + (24 * 60 * 60 * 1000);
+            localStorage.setItem('m_end', data.miningEnd);
+            tg.showAlert('Майнинг запущен на 24 часа!');
+        }
+
         setInterval(() => {
-            mBal += (power * 0.0000014);
-            document.getElementById('m-bal').innerText = mBal.toFixed(6);
-            localStorage.setItem('m_bal', mBal);
+            const now = Date.now();
+            const timerEl = document.getElementById('timer');
+            const statusEl = document.getElementById('mining-status');
+            const startBtn = document.getElementById('start-btn');
+            const collectBtn = document.getElementById('collect-btn');
 
-            const btn = document.getElementById('claim-btn');
-            if(mBal >= 1) {
-                btn.disabled = false;
-                btn.innerText = "СОБРАТЬ ПРИБЫЛЬ";
+            if (now < data.miningEnd) {
+                let diff = data.miningEnd - now;
+                let h = Math.floor(diff/3600000), m = Math.floor((diff%3600000)/60000), s = Math.floor((diff%60000)/1000);
+                timerEl.innerText = `${h}:${m<10?'0':''}${m}:${s<10?'0':''}${s}`;
+                statusEl.innerText = "МАЙНИНГ АКТИВЕН ● ЖИВОЙ ПРОЦЕСС";
+                startBtn.style.display = 'none';
+                collectBtn.style.display = 'block';
+                
+                data.mBal += (data.power * 0.0000014);
+                document.getElementById('m-bal').innerText = data.mBal.toFixed(6);
+                localStorage.setItem('m_bal', data.mBal);
             } else {
-                btn.disabled = true;
-                btn.innerText = `Собрать от 1.00 USDT`;
+                timerEl.innerText = "00:00:00";
+                statusEl.innerText = "МАЙНИНГ ОСТАНОВЛЕН";
+                startBtn.style.display = 'block';
+                collectBtn.style.display = 'none';
             }
         }, 1000);
 
-        function collectProfit() {
-            wBal += mBal; mBal = 0;
-            updateUI();
-            localStorage.setItem('w_bal', wBal);
-            localStorage.setItem('m_bal', mBal);
-            tg.showPopup({ title: 'Успех!', message: 'Средства зачислены на основной баланс.', buttons: [{type: 'ok'}] });
+        // 4. КВЕСТЫ
+        const qData = [
+            { id: 1, target: 5, reward: 1.25, title: "Пригласи 5 друзей" },
+            { id: 2, target: 10, reward: 2.0, title: "Пригласи 10 друзей" },
+            { id: 3, target: 50, reward: 8.0, title: "Пригласи 50 друзей" },
+            { id: 4, target: 100, reward: 15.0, title: "Пригласи 100 друзей" }
+        ];
+
+        function renderQuests() {
+            const container = document.getElementById('quest-list');
+            container.innerHTML = '';
+            qData.forEach(q => {
+                const isDone = data.quests.includes(q.id);
+                const canClaim = data.refs >= q.target && !isDone;
+                container.innerHTML += `
+                    <div class="quest">
+                        <div class="quest-info">
+                            <b>${q.title}</b>
+                            <span>+${q.reward} TH/s к скорости</span>
+                        </div>
+                        <button class="btn btn-primary" style="width:auto; padding:8px 15px;" 
+                            ${(!canClaim) ? 'disabled' : ''} onclick="claimQuest(${q.id}, ${q.reward})">
+                            ${isDone ? 'Взято' : (canClaim ? 'Забрать' : `${data.refs}/${q.target}`)}
+                        </button>
+                    </div>`;
+            });
+        }
+
+        function claimQuest(id, reward) {
+            data.power += reward;
+            data.quests.push(id);
+            localStorage.setItem('power', data.power);
+            localStorage.setItem('q_done', JSON.stringify(data.quests));
+            updateUI(); renderQuests();
+            tg.showAlert('Скорость увеличена!');
+        }
+
+        // 5. ВСПОМОГАТЕЛЬНОЕ
+        function tab(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            event.currentTarget.classList.add('active');
+            if(id === 'quests') renderQuests();
+        }
+
+        function collect() {
+            if(data.mBal < 1) return tg.showAlert('Нужно минимум 1.00 USDT');
+            data.wBal += data.mBal; data.mBal = 0;
+            updateUI(); localStorage.setItem('w_bal', data.wBal);
         }
 
         function updateUI() {
-            document.getElementById('w-bal').innerText = wBal.toFixed(2);
-            document.getElementById('w-sub').innerText = wBal.toFixed(2);
-            document.getElementById('total-paid').innerText = tPaid.toFixed(2);
-            document.getElementById('power-val').innerText = power.toFixed(2);
-            document.getElementById('p-total').innerText = power.toFixed(2);
+            document.getElementById('w-bal').innerText = data.wBal.toFixed(2);
+            document.getElementById('p-val').innerText = data.power.toFixed(2);
+            document.getElementById('p-total').innerText = data.power.toFixed(2);
+            document.getElementById('p-usd').innerText = (data.power * 0.8).toFixed(2);
+            document.getElementById('ref-count').innerText = data.refs;
         }
 
-        function toggleShop(show) { document.getElementById('shop-overlay').style.display = show ? 'flex' : 'none'; }
-        function buy(plan) { tg.openTelegramLink("http://t.me/send?start=IVubelJ5G9NB"); toggleShop(false); }
-        function copyRef() {
-            const el = document.getElementById('ref-link'); el.select(); document.execCommand('copy');
+        function copyLink() {
+            const link = `t.me/DropStarsBot?start=ref${tg.initDataUnsafe.user?.id || '0'}`;
             tg.showAlert('Ссылка скопирована!');
         }
 
-        // Инициализация юзера
-        if(tg.initDataUnsafe.user) {
-            document.getElementById('user-display').innerText = tg.initDataUnsafe.user.first_name;
-            document.getElementById('u-id').innerText = tg.initDataUnsafe.user.id;
-        }
         updateUI();
     </script>
 </body>
