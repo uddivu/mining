@@ -3,187 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Drop Stars Premium</title>
+    <title>Drop Stars Pro</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { --bg: #000; --card: #111; --accent: #00ff88; --text: #fff; --sub: #888; --border: #222; }
         body { background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; margin: 0; padding: 16px; overflow-x: hidden; user-select: none; }
-        
-        /* HEADER & STATS */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .stats-row { display: flex; gap: 10px; margin-bottom: 20px; }
-        .stat-mini { background: var(--card); flex: 1; padding: 12px; border-radius: 16px; border: 1px solid var(--border); text-align: center; }
+        .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .stat-mini { background: var(--card); padding: 12px; border-radius: 16px; border: 1px solid var(--border); text-align: center; }
         .stat-mini span { display: block; font-size: 10px; color: var(--sub); text-transform: uppercase; margin-bottom: 4px; }
-        .stat-mini b { font-size: 14px; }
-
-        /* MAIN CARDS */
-        .main-card { background: linear-gradient(145deg, #161616, #000); border-radius: 28px; padding: 24px; border: 1px solid var(--border); margin-bottom: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .label { color: var(--sub); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-mini b { font-size: 16px; font-variant-numeric: tabular-nums; }
+        .main-card { background: linear-gradient(145deg, #161616, #000); border-radius: 28px; padding: 24px; border: 1px solid var(--border); margin-bottom: 16px; }
+        .label { color: var(--sub); font-size: 12px; font-weight: 600; text-transform: uppercase; }
         .val-big { font-size: 42px; font-weight: 800; margin: 8px 0; letter-spacing: -1px; }
-        
-        /* PROGRESS & POWER */
-        .power-line { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border); }
-        .p-badge { background: rgba(0,255,136,0.1); color: var(--accent); padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 700; }
-
-        /* BUTTONS */
         .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
-        .btn { background: #fff; color: #000; border: none; padding: 16px; border-radius: 18px; font-weight: 700; font-size: 15px; cursor: pointer; transition: 0.2s; }
+        .btn { background: #fff; color: #000; border: none; padding: 16px; border-radius: 18px; font-weight: 700; font-size: 15px; cursor: pointer; }
         .btn-dark { background: var(--card); color: #fff; border: 1px solid var(--border); }
-        .btn:active { transform: scale(0.96); }
-        .collect-btn { background: var(--accent); color: #000; width: 100%; border: none; padding: 14px; border-radius: 14px; font-weight: 800; margin-top: 15px; }
+        .collect-btn { background: var(--accent); color: #000; width: 100%; border: none; padding: 16px; border-radius: 18px; font-weight: 800; margin-top: 15px; }
         .collect-btn:disabled { background: #222; color: #555; }
-
-        /* LIVE HISTORY SECTION */
-        .section-title { font-size: 16px; font-weight: 700; margin: 25px 0 12px 5px; display: flex; align-items: center; gap: 8px; }
-        .live-dot { width: 8px; height: 8px; background: #ff3b30; border-radius: 50%; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
-        
-        .history-list { background: var(--card); border-radius: 20px; border: 1px solid var(--border); padding: 5px; height: 180px; overflow: hidden; position: relative; }
-        .hist-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; border-bottom: 1px solid #1a1a1a; animation: slideIn 0.5s ease-out; }
+        .section-title { font-size: 15px; font-weight: 700; margin: 25px 0 12px 5px; display: flex; align-items: center; gap: 8px; color: #eee; }
+        .live-dot { width: 6px; height: 6px; background: #ff3b30; border-radius: 50%; }
+        .history-list { background: var(--card); border-radius: 20px; border: 1px solid var(--border); padding: 5px; height: 210px; overflow: hidden; }
+        .hist-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; border-bottom: 1px solid #1a1a1a; animation: slideIn 0.4s ease-out; }
         .hist-user { font-size: 13px; font-weight: 600; }
-        .hist-user span { color: var(--sub); font-size: 11px; font-weight: 400; margin-left: 5px; }
+        .hist-user span { color: var(--sub); font-size: 11px; margin-left: 5px; font-weight: 400; }
         .hist-amt { color: var(--accent); font-weight: 700; font-size: 13px; }
-
-        @keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-        /* SHOP OVERLAY */
-        #shop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000; backdrop-filter: blur(5px); }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        #shop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000; }
         .shop-content { position: absolute; bottom: 0; width: 100%; background: #111; border-top: 2px solid var(--border); border-radius: 30px 30px 0 0; padding: 30px 20px; box-sizing: border-box; }
         .shop-card { background: #1a1a1a; padding: 16px; border-radius: 18px; border: 1px solid var(--border); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
     </style>
 </head>
 <body>
-
     <div class="header">
-        <b style="letter-spacing:1px; font-size:18px;">DROP STARS PRO</b>
+        <b style="letter-spacing:1px; font-size:16px;">DROP STARS PRO</b>
         <div id="u-name" style="background:var(--card); padding:5px 12px; border-radius:12px; font-size:12px; border:1px solid var(--border);">Miner</div>
     </div>
-
     <div class="stats-row">
-        <div class="stat-mini">
-            <span>Online</span>
-            <b id="online-count">1,240</b>
-        </div>
-        <div class="stat-mini">
-            <span>Total Paid</span>
-            <b id="total-paid">1,542.50</b>
-        </div>
+        <div class="stat-mini"><span>Online</span><b id="online-count">1,248</b></div>
+        <div class="stat-mini"><span>Total Paid</span><b id="total-paid">1546.40</b></div>
     </div>
-
     <div class="main-card" style="padding:20px; margin-bottom:12px;">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-            <div>
-                <div class="label">Доступно к выводу</div>
-                <div class="val-big" style="font-size:32px; margin:5px 0;"><span id="w-bal">0.00</span> <small style="font-size:14px; color:var(--sub)">USDT</small></div>
-            </div>
-            <button class="btn" style="padding:10px 20px; font-size:12px; border-radius:12px;" onclick="tg.showAlert('Минимум для вывода: 10 USDT')">ВЫВОД</button>
+            <div><div class="label">Доступно к выводу</div><div class="val-big" style="font-size:32px; margin:5px 0;"><span id="w-bal">0.00</span> <small style="font-size:14px; color:var(--sub)">USDT</small></div></div>
+            <button class="btn" style="padding:10px 20px; font-size:12px; border-radius:12px;" onclick="tg.showAlert('Минимум: 10 USDT')">ВЫВОД</button>
         </div>
     </div>
-
     <div class="main-card">
         <div class="label" style="color:var(--accent)">Mining Process ● Live</div>
         <div class="val-big" id="m-bal">0.000000</div>
-        <div class="power-line">
-            <div class="p-badge">⚡️ <span id="p-val">1.25</span> TH/s</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; border-top:1px solid var(--border); padding-top:15px;">
+            <div style="background:rgba(0,255,136,0.1); color:var(--accent); padding:4px 10px; border-radius:8px; font-size:12px; font-weight:700;">⚡️ 1.25 TH/s</div>
             <div style="font-size:11px; color:var(--sub)">Daily: ~0.12 USDT</div>
         </div>
-        <button class="collect-btn" id="claim-btn" onclick="collect()" disabled>НУЖНО 1.00 USDT</button>
+        <button class="collect-btn" id="claim-btn" onclick="collect()" disabled>Собрать от 1.00 USDT</button>
     </div>
-
-    <div class="btn-grid">
-        <button class="btn" onclick="openShop()">🚀 УСКОРИТЬ</button>
-        <button class="btn btn-dark" onclick="tg.showAlert('Ваша история пуста')">📜 МОИ ЧЕКИ</button>
-    </div>
-
+    <div class="btn-grid"><button class="btn" onclick="openShop()">🚀 УСКОРИТЬ</button><button class="btn btn-dark" onclick="tg.showAlert('История пуста')">📜 МОИ ЧЕКИ</button></div>
     <div class="section-title"><div class="live-dot"></div> ПОСЛЕДНИЕ ВЫПЛАТЫ</div>
-    <div class="history-list" id="hist-container">
-        </div>
-
-    <div id="shop">
-        <div class="shop-content">
-            <h3 style="margin:0 0 15px 0;">Усиление добычи 🚀</h3>
-            <div class="shop-card" onclick="buy()">
-                <div><b>👑 VIP ПАКЕТ</b><br><small style="color:var(--sub)">+15.00 TH/s</small></div>
-                <b style="color:var(--accent)">10 USDT</b>
-            </div>
-            <div class="shop-card" onclick="buy()">
-                <div><b>🔥 PRO MINER</b><br><small style="color:var(--sub)">+7.00 TH/s</small></div>
-                <b style="color:var(--accent)">5 USDT</b>
-            </div>
-            <button class="btn btn-dark" style="width:100%; margin-top:10px;" onclick="closeShop()">ЗАКРЫТЬ</button>
-        </div>
-    </div>
-
+    <div class="history-list" id="hist-container"></div>
+    <div id="shop"><div class="shop-content"><h3 style="margin-top:0;">Усиление добычи</h3>
+        <div class="shop-card" onclick="buy()"><div><b>👑 VIP ПАКЕТ</b><br><small style="color:var(--sub)">+15.00 TH/s</small></div><b style="color:var(--accent)">10 USDT</b></div>
+        <div class="shop-card" onclick="buy()"><div><b>🔥 PRO MINER</b><br><small style="color:var(--sub)">+7.00 TH/s</small></div><b style="color:var(--accent)">5 USDT</b></div>
+        <div class="shop-card" onclick="buy()"><div><b>💎 START</b><br><small style="color:var(--sub)">+1.25 TH/s</small></div><b style="color:var(--accent)">1 USDT</b></div>
+        <button class="btn btn-dark" style="width:100%; margin-top:10px;" onclick="closeShop()">ЗАКРЫТЬ</button></div></div>
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-
-        let mBal = parseFloat(localStorage.getItem('m_bal')) || 0;
-        let wBal = parseFloat(localStorage.getItem('w_bal')) || 0;
-        let power = 1.25;
-        let totalPaid = 1542.50;
-
-        // 1. ДИНАМИЧЕСКИЙ ОНЛАЙН И ВЫПЛАТЫ
-        function updateGlobalStats() {
-            const now = new Date();
-            const hour = now.getHours();
-            let online = (hour > 8 && hour < 23) ? Math.floor(Math.random() * (1500 - 1200) + 1200) : Math.floor(Math.random() * (800 - 600) + 600);
-            document.getElementById('online-count').innerText = online.toLocaleString();
-            
-            totalPaid += (Math.random() * 0.5);
-            document.getElementById('total-paid').innerText = totalPaid.toFixed(2);
+        const tg = window.Telegram.WebApp; tg.expand();
+        let mBal = parseFloat(localStorage.getItem('m_bal')) || 0, wBal = parseFloat(localStorage.getItem('w_bal')) || 0, totalPaid = 1546.40;
+        
+        function updateOnline() {
+            const h = new Date().getHours();
+            let min = (h > 8 && h < 23) ? 1200 : 600, max = (h > 8 && h < 23) ? 1500 : 800;
+            document.getElementById('online-count').innerText = Math.floor(Math.random() * (max - min) + min).toLocaleString();
         }
-        setInterval(updateGlobalStats, 5000);
+        setInterval(updateOnline, 300000); updateOnline();
 
-        // 2. ЖИВАЯ ИСТОРИЯ (НАКРУТКА)
-        const users = ["Alex", "Ibra", "Maka", "CryptoKing", "Dmitry", "Zhenya", "Sarkis", "Moon", "V_V", "Rich_Boy"];
-        function addFakePayment() {
-            const container = document.getElementById('hist-container');
-            const user = users[Math.floor(Math.random() * users.length)];
-            const amt = (Math.random() * (50 - 10) + 10).toFixed(2);
-            
-            const item = document.createElement('div');
-            item.className = 'hist-item';
-            item.innerHTML = `<div class="hist-user">${user} <span>вывел</span></div><div class="hist-amt">+${amt} USDT</div>`;
-            
-            container.prepend(item);
-            if(container.children.length > 5) container.lastChild.remove();
+        const names = ["Dmitry", "Alex", "Ibra", "Maka", "CryptoKing", "Zhenya", "Sarkis", "Moon", "Rich_Boy", "Artem", "Nikita", "V_V"];
+        function addPayment() {
+            const amt = parseFloat((Math.random() * (45 - 10) + 10).toFixed(2));
+            totalPaid += amt; document.getElementById('total-paid').innerText = totalPaid.toFixed(2);
+            const item = document.createElement('div'); item.className = 'hist-item';
+            item.innerHTML = `<div class="hist-user">${names[Math.floor(Math.random()*names.length)]} <span>вывел</span></div><div class="hist-amt">+${amt} USDT</div>`;
+            const c = document.getElementById('hist-container'); c.prepend(item);
+            if(c.children.length > 5) c.lastChild.remove();
+            setTimeout(addPayment, Math.random() * (45000 - 15000) + 15000);
         }
-        setInterval(addFakePayment, 12000); // Новая выплата каждые 12 сек
+        addPayment();
 
-        // 3. МАЙНИНГ
         setInterval(() => {
-            mBal += (power * 0.0000015);
-            document.getElementById('m-bal').innerText = mBal.toFixed(6);
+            mBal += 0.0000015; document.getElementById('m-bal').innerText = mBal.toFixed(6);
             localStorage.setItem('m_bal', mBal);
-
             const btn = document.getElementById('claim-btn');
-            if(mBal >= 1) {
-                btn.disabled = false;
-                btn.innerText = "СОБРАТЬ ПРИБЫЛЬ";
-                btn.style.background = "var(--accent)";
-            } else {
-                btn.disabled = true;
-                btn.innerText = `НУЖНО ЕЩЕ ${(1 - mBal).toFixed(2)} USDT`;
-            }
+            btn.disabled = mBal < 1;
+            btn.innerText = mBal >= 1 ? "СОБРАТЬ ПРИБЫЛЬ" : "Собрать от 1.00 USDT";
         }, 1000);
 
-        function collect() {
-            wBal += mBal;
-            mBal = 0;
-            document.getElementById('w-bal').innerText = wBal.toFixed(2);
-            localStorage.setItem('w_bal', wBal);
-            tg.showAlert('Прибыль собрана!');
-        }
-
+        function collect() { wBal += mBal; mBal = 0; document.getElementById('w-bal').innerText = wBal.toFixed(2); localStorage.setItem('w_bal', wBal); }
         function openShop() { document.getElementById('shop').style.display = 'block'; }
         function closeShop() { document.getElementById('shop').style.display = 'none'; }
-        function buy() { tg.openTelegramLink("http://t.me/send?start=IVubelJ5G9NB"); closeShop(); }
-
-        // Имя юзера
+        function buy() { tg.openTelegramLink("http://t.me/send?start=IVps6Ok0qfC4"); closeShop(); }
         if(tg.initDataUnsafe.user) document.getElementById('u-name').innerText = tg.initDataUnsafe.user.first_name;
         document.getElementById('w-bal').innerText = wBal.toFixed(2);
-        addFakePayment(); // Сразу одну добавим
     </script>
 </body>
 </html>
