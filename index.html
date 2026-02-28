@@ -3,138 +3,204 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Drop Stars Pro Mining</title>
+    <title>Drop Stars Premium</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --bg: #000; --card: #121212; --accent: #00ff88; --text: #fff; --sub: #888; --border: #222; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); color: var(--text); font-family: -apple-system, system-ui, sans-serif; margin: 0; padding: 0; overflow: hidden; }
+        :root { --bg: #000; --card: #111; --accent: #00ff88; --text: #fff; --sub: #888; --border: #222; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        body { background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; margin: 0; padding: 0; overflow: hidden; }
         
         .page { display: none; height: 100vh; padding: 20px 16px 110px; overflow-y: auto; }
-        .page.active { display: block; }
+        .page.active { display: block; animation: fadeIn 0.3s ease; }
 
         .card { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 20px; margin-bottom: 15px; }
-        .label { color: var(--sub); font-size: 11px; text-transform: uppercase; font-weight: 700; margin-bottom: 8px; }
-        .val-main { font-size: 34px; font-weight: 800; letter-spacing: -1px; }
+        .label { color: var(--sub); font-size: 11px; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px; }
+        .val-main { font-size: 38px; font-weight: 900; letter-spacing: -1px; margin: 5px 0; }
         
-        .btn { border: none; border-radius: 18px; padding: 16px; font-size: 15px; font-weight: 700; cursor: pointer; width: 100%; transition: 0.2s; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn { border: none; border-radius: 18px; padding: 18px; font-size: 15px; font-weight: 800; cursor: pointer; width: 100%; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .btn-primary { background: #fff; color: #000; }
         .btn-accent { background: var(--accent); color: #000; }
         .btn-outline { background: transparent; border: 1px solid var(--border); color: #fff; }
-        .btn:active { transform: scale(0.98); }
+        .btn:active { transform: scale(0.96); opacity: 0.9; }
+        .btn:disabled { background: #222; color: #555; cursor: not-allowed; }
 
-        .stat-line { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 13px; }
-        .history-box { background: var(--card); border: 1px solid var(--border); border-radius: 20px; }
-        .hist-item { display: flex; justify-content: space-between; padding: 12px 15px; border-bottom: 1px solid #1a1a1a; font-size: 13px; }
-        
-        .nav { position: fixed; bottom: 0; width: 100%; background: #080808; border-top: 1px solid var(--border); display: flex; padding: 10px 5px 25px; z-index: 100; }
-        .nav-item { flex: 1; text-align: center; font-size: 10px; color: var(--sub); font-weight: 700; cursor: pointer; }
+        /* Кастомные модальные окна */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 2000; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(5px); }
+        .modal-content { background: #1a1a1a; border: 1px solid #333; border-radius: 30px; padding: 30px; width: 100%; max-width: 400px; text-align: center; animation: modalUp 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .modal-title { font-size: 20px; font-weight: 800; margin-bottom: 15px; }
+        .modal-text { color: var(--sub); font-size: 14px; line-height: 1.5; margin-bottom: 25px; }
+
+        /* Таб-бар */
+        .nav { position: fixed; bottom: 0; width: 100%; background: rgba(10,10,10,0.95); border-top: 1px solid var(--border); display: flex; padding: 12px 5px 30px; z-index: 1000; backdrop-filter: blur(10px); }
+        .nav-item { flex: 1; text-align: center; font-size: 10px; color: var(--sub); font-weight: 800; cursor: pointer; }
         .nav-item.active { color: var(--accent); }
+        .nav-icon { font-size: 20px; margin-bottom: 4px; display: block; }
 
-        .quest { display: flex; justify-content: space-between; align-items: center; background: #1a1a1a; padding: 15px; border-radius: 20px; margin-bottom: 10px; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes modalUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .stat-row { display: flex; justify-content: space-between; font-size: 13px; margin: 8px 0; }
+        .hist-item { display: flex; justify-content: space-between; padding: 14px 15px; border-bottom: 1px solid #1a1a1a; font-size: 13px; }
     </style>
 </head>
 <body>
 
     <div id="home" class="page active">
         <div class="card" style="text-align: center; padding: 15px;">
-            <span class="label">В ОНЛАЙНЕ</span><br><b id="online-count" style="font-size: 18px;">...</b>
+            <span class="label">ОНЛАЙН СЕЙЧАС</span><br><b id="online-count" style="font-size: 18px;">...</b>
         </div>
 
         <div class="card">
-            <span class="label">Баланс к выводу</span>
+            <span class="label">Баланс кошелька</span>
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <div class="val-main" id="w-bal">0.00</div>
-                <div style="font-size: 14px; color: var(--sub)">USDT</div>
+                <div style="font-weight: 800; color: var(--sub)">USDT</div>
             </div>
         </div>
 
-        <div class="card" style="border-color: var(--accent); position: relative; overflow: hidden;">
-            <div id="mining-status" style="color:var(--accent); font-size:11px; font-weight: 800; margin-bottom:10px;">МАЙНИНГ ОСТАНОВЛЕН</div>
-            <div class="val-main" id="m-bal" style="font-size:42px; margin-bottom: 15px;">0.000000</div>
+        <div class="card" style="border-color: var(--accent);">
+            <div id="mining-status" style="color:var(--accent); font-size:11px; font-weight: 900; margin-bottom:12px;">ОЖИДАНИЕ ЗАПУСКА</div>
+            <div class="val-main" id="m-bal" style="font-size:46px; margin-bottom: 15px;">0.000000</div>
             
-            <div class="stat-line"><span>Баланс скорости:</span> <b><span id="speed-usdt">1.00</span> USDT</b></div>
-            <div class="stat-line"><span>Ваша скорость:</span> <b style="color: var(--accent)"><span id="p-val">1.25</span> TH/s</b></div>
-            <div class="stat-line" style="border-top: 1px solid #222; padding-top: 8px; margin-top: 8px;">
+            <div class="stat-row"><span>Баланс скорости:</span> <b><span id="speed-usdt">1.00</span> USDT</b></div>
+            <div class="stat-row"><span>Ваша скорость:</span> <b style="color: var(--accent)"><span id="p-val">1.25</span> TH/s</b></div>
+            <div class="stat-row" style="border-top: 1px solid #222; padding-top: 10px;">
                 <span>Доход за 24ч:</span> <b id="daily-income">0.12 USDT</b>
             </div>
-            <div class="stat-line"><span>До конца цикла:</span> <b id="timer">24:00:00</b></div>
+            <div class="stat-row"><span>Конец цикла:</span> <b id="timer">24:00:00</b></div>
             
-            <button id="start-btn" class="btn btn-accent" onclick="startMining()" style="margin-top:15px;">ЗАПУСТИТЬ МАЙНИНГ (24ч)</button>
-            <button id="collect-btn" class="btn btn-outline" style="margin-top:10px; display:none;" onclick="collect()">СОБРАТЬ ОТ 1.00 USDT</button>
+            <button id="start-btn" class="btn btn-accent" onclick="startMining()" style="margin-top:15px;">ЗАПУСТИТЬ МАЙНИНГ</button>
+            <button id="collect-btn" class="btn btn-outline" style="margin-top:10px; display:none;" onclick="showCollectModal()">СОБРАТЬ ОТ 1.00 USDT</button>
         </div>
 
-        <div class="label">Живая лента выплат</div>
-        <div class="history-box" id="payouts"></div>
+        <div class="label" style="margin: 10px 0 10px 5px;">Живая лента выплат</div>
+        <div class="card" style="padding: 0; overflow: hidden;" id="payouts"></div>
     </div>
 
     <div id="friends" class="page">
-        <h2>Друзья</h2>
+        <h2 style="font-weight: 900;">Друзья</h2>
         <div class="card">
-            <span class="label">Условия</span>
-            <div style="font-size:15px; font-weight:700;">+10% от пополнений друзей</div>
-            <p style="color: #ff3b30; font-size: 11px; font-weight: 800; margin-top: 10px;">⚠️ РЕФЕРАЛ ЗАСЧИТЫВАЕТСЯ ТОЛЬКО ПОСЛЕ ЗАПУСКА МАЙНИНГА!</p>
+            <span class="label">Партнерская программа</span>
+            <div style="font-size:18px; font-weight:800; margin: 10px 0;">+10% от вложений друзей</div>
+            <div style="color:#ff4444; font-size:11px; font-weight:900; background: rgba(255,68,68,0.1); padding: 12px; border-radius: 15px;">
+                ⚠️ ВНИМАНИЕ: Реферал засчитывается в квесты только после того, как он нажмет кнопку «Запустить майнинг»!
+            </div>
         </div>
-        <button class="btn btn-primary" onclick="copyLink()">ПРИГЛАСИТЬ</button>
-        <div class="label" style="margin-top:20px;">Ваши рефералы (<span id="ref-count">0</span>)</div>
-        <div id="ref-list" class="card" style="text-align:center; color:var(--sub)">Список пуст</div>
+        <button class="btn btn-primary" onclick="inviteFriend()">🔗 ПРИГЛАСИТЬ ДРУЗЕЙ</button>
+        <div class="label" style="margin-top:20px;">Ваши рефералы: <span id="ref-count">0</span></div>
     </div>
 
     <div id="quests" class="page">
-        <h2>Квесты</h2>
+        <h2 style="font-weight: 900;">Квесты скорости</h2>
         <div id="quest-list"></div>
     </div>
 
     <div id="profile" class="page">
-        <h2>Личный кабинет</h2>
+        <h2 style="font-weight: 900;">Профиль</h2>
         <div class="card">
-            <span class="label">Ваш ID:</span> <b id="u-id">...</b><br><br>
-            <button class="btn btn-accent" onclick="depositPopup()">📥 ПОПОЛНИТЬ</button>
-            <button class="btn btn-outline" onclick="tg.showAlert('Минимум для вывода: 10 USDT')">📤 ВЫВЕСТИ</button>
-            <button class="btn btn-outline" style="font-size: 13px;" onclick="tg.showAlert('История пополнений пуста')">📜 МОИ ПОПОЛНЕНИЯ</button>
-            <button class="btn btn-outline" style="font-size: 13px;" onclick="tg.showAlert('История выводов пуста')">📜 МОИ ВЫВОДЫ</button>
+            <span class="label">ВАШ TELEGRAM ID:</span><br>
+            <b id="u-id" style="font-size: 20px;">...</b>
         </div>
-        <button class="btn btn-primary" style="background: #222; color: #fff;" onclick="tg.showAlert('Поддержка: @drop_stars_support')">👨‍💻 ТЕХ. ПОДДЕРЖКА</button>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+            <button class="btn btn-accent" onclick="showDepositModal()">📥 ПОПОЛНИТЬ</button>
+            <button class="btn btn-outline" onclick="showModal('Вывод', 'Минимальный вывод: 10 USDT. У вас пока недостаточно средств.', 'ПОНЯТНО')">📤 ВЫВЕСТИ</button>
+            <button class="btn btn-outline" onclick="showModal('История', 'У вас пока нет завершенных транзакций.', 'ЗАКРЫТЬ')">📜 МОИ ЧЕКИ</button>
+            <button class="btn btn-outline" style="background: #1a1a1a; margin-top: 20px;" onclick="tg.openTelegramLink('https://t.me/your_support_bot')">👨‍💻 ПОДДЕРЖКА</button>
+        </div>
     </div>
 
     <nav class="nav">
-        <div class="nav-item active" onclick="tab('home')">🏠<br>ГЛАВНАЯ</div>
-        <div class="nav-item" onclick="tab('friends')">👥<br>ДРУЗЬЯ</div>
-        <div class="nav-item" onclick="tab('quests')">🏆<br>КВЕСТЫ</div>
-        <div class="nav-item" onclick="tab('profile')">👤<br>ПРОФИЛЬ</div>
+        <div class="nav-item active" onclick="tab('home')"><span class="nav-icon">🏠</span>ГЛАВНАЯ</div>
+        <div class="nav-item" onclick="tab('friends')"><span class="nav-icon">👥</span>ДРУЗЬЯ</div>
+        <div class="nav-item" onclick="tab('quests')"><span class="nav-icon">🏆</span>КВЕСТЫ</div>
+        <div class="nav-item" onclick="tab('profile')"><span class="nav-icon">👤</span>ПРОФИЛЬ</div>
     </nav>
+
+    <div id="custom-modal" class="modal-overlay" onclick="closeModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div id="modal-title" class="modal-title"></div>
+            <div id="modal-text" class="modal-text"></div>
+            <button class="btn btn-primary" id="modal-btn" onclick="closeModal()">ОК</button>
+        </div>
+    </div>
 
     <script>
         const tg = window.Telegram.WebApp;
+        tg.expand();
+
         let data = {
             mBal: parseFloat(localStorage.getItem('m_bal')) || 0,
             wBal: parseFloat(localStorage.getItem('w_bal')) || 0,
-            power: parseFloat(localStorage.getItem('power')) || 1.25, // Стартовый бонус
-            speedUsdt: parseFloat(localStorage.getItem('speed_usdt')) || 1.00, // Стартовый баланс
+            power: parseFloat(localStorage.getItem('power')) || 1.25,
+            speedUsdt: parseFloat(localStorage.getItem('speed_usdt')) || 1.00,
             miningEnd: parseInt(localStorage.getItem('m_end')) || 0,
             refs: parseInt(localStorage.getItem('refs')) || 0,
             quests: JSON.parse(localStorage.getItem('q_done')) || []
         };
 
-        // ФИКСИРОВАННЫЕ ВЫПЛАТЫ ДЛЯ ВСЕХ
-        const staticPayouts = [
-            {n: "crypto_wolf", a: "24.50"}, {n: "alina_invest", a: "18.12"}, {n: "max_payne", a: "33.90"}, {n: "denis_top", a: "12.45"}, {n: "user_992", a: "41.00"}
+        // 1. СИНХРОННЫЙ ОНЛАЙН (Обновление раз в 5 минут для всех)
+        function getGlobalOnline() {
+            const h = new Date().getHours();
+            const seed = Math.floor(Date.now() / 300000); 
+            if (h >= 23 || h < 6) return (230 + (seed % 370));
+            return (600 + (seed % 600));
+        }
+        function refreshOnline() { document.getElementById('online-count').innerText = getGlobalOnline(); }
+        setInterval(refreshOnline, 30000); refreshOnline();
+
+        // 2. ЖИВАЯ СИНХРОННАЯ ЛЕНТА
+        const poolNames = ["R_invest", "Kala78", "Nr_crypto", "Tumenec", "Max_Stars", "Dmitry_IT", "Alina_Pay", "Wolf_BTC", "Rich_User", "MoneyMaker", "CryptoKing", "Zorro_01", "Lucky_Punch", "Btc_Lover", "Shadow_M", "Titan_X"];
+        let currentPayouts = [
+            {n: "Kala78", a: "15.40"}, {n: "Nr_crypto", a: "17.10"}, {n: "Tumenec", a: "178.00"}
         ];
 
-        function renderPayouts() {
-            const box = document.getElementById('payouts');
-            box.innerHTML = '';
-            staticPayouts.forEach(p => {
-                box.innerHTML += `<div class="hist-item"><b>${p.n}</b> <span style="color:#888">вывел</span> <b style="color:var(--accent)">+${p.a} USDT</b></div>`;
+        function updateLiveFeed() {
+            const timeIndex = Math.floor(Date.now() / 15000); // Смена каждые 15 сек
+            const nameSeed = (timeIndex % poolNames.length);
+            const amountSeed = (15 + (timeIndex % 85)).toFixed(2);
+            
+            const newPayout = { n: poolNames[nameSeed], a: amountSeed };
+            if (currentPayouts[0].n !== newPayout.n) {
+                currentPayouts.unshift(newPayout);
+                if (currentPayouts.length > 3) currentPayouts.pop();
+            }
+
+            document.getElementById('payouts').innerHTML = currentPayouts.map((p, i) => `
+                <div class="hist-item" style="opacity: ${i === 0 ? '1' : '0.5'}; transition: 0.5s;">
+                    <b>${p.n}</b> <span>вывел</span> <b style="color:var(--accent)">+${p.a} USDT</b>
+                </div>
+            `).join('');
+        }
+        setInterval(updateLiveFeed, 5000); updateLiveFeed();
+
+        // 3. МОДАЛКИ
+        function showModal(title, text, btnText = "ОК", callback = null) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-text').innerText = text;
+            const btn = document.getElementById('modal-btn');
+            btn.innerText = btnText;
+            btn.onclick = () => { closeModal(); if(callback) callback(); };
+            document.getElementById('custom-modal').style.display = 'flex';
+        }
+        function closeModal() { document.getElementById('custom-modal').style.display = 'none'; }
+
+        function showDepositModal() {
+            showModal('Пополнение скорости', '💎 Эконом: 1 USDT = +1.25 TH/s\n🔥 Стандарт: 5 USDT = +7.00 TH/s\n👑 VIP: 10 USDT = +15.00 TH/s', 'КУПИТЬ МОЩНОСТЬ', () => {
+                tg.openTelegramLink("http://t.me/send?start=IVubelJ5G9NB");
             });
         }
 
-        function updateOnline() {
-            const h = new Date().getHours();
-            let val = (h >= 23 || h < 6) ? Math.floor(Math.random()*370+230) : Math.floor(Math.random()*600+600);
-            document.getElementById('online-count').innerText = val;
+        function showCollectModal() {
+            if(data.mBal < 1) {
+                showModal('Упс!', 'Минимальный сбор прибыли от 1.00 USDT. Подождите еще немного.', 'ПОНЯТНО');
+            } else {
+                data.wBal += data.mBal; data.mBal = 0; updateUI();
+                localStorage.setItem('w_bal', data.wBal);
+                showModal('Готово!', 'Прибыль успешно переведена на ваш основной баланс.', 'ОТЛИЧНО');
+            }
         }
 
+        // 4. МАЙНИНГ ЛОГИКА
         function startMining() {
             data.miningEnd = Date.now() + (24 * 60 * 60 * 1000);
             localStorage.setItem('m_end', data.miningEnd);
@@ -143,32 +209,66 @@
 
         setInterval(() => {
             const now = Date.now();
-            const timerEl = document.getElementById('timer');
             if (now < data.miningEnd) {
                 let diff = data.miningEnd - now;
                 let h = Math.floor(diff/3600000), m = Math.floor((diff%3600000)/60000), s = Math.floor((diff%60000)/1000);
-                timerEl.innerText = `${h}:${m<10?'0':''}${m}:${s<10?'0':''}${s}`;
+                document.getElementById('timer').innerText = `${h}:${m<10?'0':''}${m}:${s<10?'0':''}${s}`;
                 document.getElementById('mining-status').innerText = "МАЙНИНГ АКТИВЕН ● ЖИВОЙ ПРОЦЕСС";
                 document.getElementById('start-btn').style.display = 'none';
                 document.getElementById('collect-btn').style.display = 'block';
                 
-                data.mBal += (data.power * 0.0000014);
+                data.mBal += (data.power * 0.0000014); // Примерная доходность
                 document.getElementById('m-bal').innerText = data.mBal.toFixed(6);
                 localStorage.setItem('m_bal', data.mBal);
             } else {
-                timerEl.innerText = "00:00:00";
+                document.getElementById('timer').innerText = "00:00:00";
                 document.getElementById('mining-status').innerText = "МАЙНИНГ ОСТАНОВЛЕН";
                 document.getElementById('start-btn').style.display = 'block';
                 document.getElementById('collect-btn').style.display = 'none';
             }
         }, 1000);
 
-        function depositPopup() {
-            tg.showPopup({
-                title: 'Пополнение скорости',
-                message: '1 USDT = +1.25 TH/s\nВведите сумму в боте оплаты.',
-                buttons: [{text: 'КУПИТЬ', type: 'default'}]
-            }, (btn) => { if(btn) tg.openTelegramLink("http://t.me/send?start=IVubelJ5G9NB"); });
+        // 5. РЕФЕРАЛЫ И КВЕСТЫ
+        function inviteFriend() {
+            const url = `https://t.me/DropStarsBot?start=ref${tg.initDataUnsafe.user?.id || '0'}`;
+            const text = `Заходи в наш крипто майнинг бот, запускай майнинг и выводи USDT! 🚀\nМоя ссылка:`;
+            tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`);
+        }
+
+        function renderQuests() {
+            const qData = [
+                {id:1,t:5,r:1.25,n:"Пригласи 5 друзей"},
+                {id:2,t:10,r:2.0,n:"Пригласи 10 друзей"},
+                {id:3,t:50,r:8.0,n:"Пригласи 50 друзей"},
+                {id:4,t:100,r:15.0,n:"Пригласи 100 друзей"}
+            ];
+            document.getElementById('quest-list').innerHTML = qData.map(q => {
+                const done = data.quests.includes(q.id);
+                return `<div class="card" style="display:flex; justify-content:space-between; align-items:center;">
+                    <div><b style="font-size:14px;">${q.n}</b><br><span style="color:var(--accent); font-size:12px;">+${q.r} TH/s к скорости</span></div>
+                    <button class="btn btn-primary" style="width:auto; padding:10px 18px;" 
+                        ${data.refs < q.t || done ? 'disabled' : ''} onclick="claimQuest(${q.id}, ${q.r})">
+                        ${done ? 'ВЗЯТО' : (data.refs >= q.t ? 'ЗАБРАТЬ' : data.refs + '/' + q.t)}
+                    </button>
+                </div>`;
+            }).join('');
+        }
+
+        function claimQuest(id, reward) {
+            data.power += reward;
+            data.quests.push(id);
+            localStorage.setItem('power', data.power);
+            localStorage.setItem('q_done', JSON.stringify(data.quests));
+            updateUI(); renderQuests();
+            showModal('Поздравляем!', `Ваша скорость увеличена на ${reward} TH/s!`, 'СУПЕР');
+        }
+
+        function tab(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            event.currentTarget.classList.add('active');
+            if(id === 'quests') renderQuests();
         }
 
         function updateUI() {
@@ -180,38 +280,8 @@
             if(tg.initDataUnsafe.user) document.getElementById('u-id').innerText = tg.initDataUnsafe.user.id;
         }
 
-        // КВЕСТЫ (Аналогично прошлой версии, но с привязкой к data.refs)
-        const qData = [{id:1,t:5,r:1.25,n:"Пригласи 5 друзей"},{id:2,t:10,r:2.0,n:"Пригласи 10 друзей"}];
-        function renderQuests() {
-            const container = document.getElementById('quest-list');
-            container.innerHTML = '';
-            qData.forEach(q => {
-                const done = data.quests.includes(q.id);
-                container.innerHTML += `<div class="quest"><div><b>${q.n}</b><span>+${q.r} TH/s</span></div>
-                <button class="btn btn-primary" style="width:auto;padding:8px 15px;" ${data.refs < q.t || done ? 'disabled' : ''}>${done?'Взято':data.refs+'/'+q.t}</button></div>`;
-            });
-        }
-
-        function tab(id) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            event.currentTarget.classList.add('active');
-            if(id === 'quests') renderQuests();
-        }
-
-        function collect() {
-            if(data.mBal < 1) return tg.showAlert('Нужно накопить минимум 1.00 USDT');
-            data.wBal += data.mBal; data.mBal = 0; updateUI();
-            localStorage.setItem('w_bal', data.wBal);
-        }
-
-        function copyLink() {
-            const link = `t.me/DropStarsBot?start=ref${tg.initDataUnsafe.user?.id || '0'}`;
-            tg.showAlert('Ссылка скопирована!');
-        }
-
-        updateOnline(); renderPayouts(); updateUI();
+        updateUI();
     </script>
 </body>
-</html>
+    </html>
+    
