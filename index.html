@@ -42,10 +42,8 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
         
-        // Загружаем сохраненный баланс или начинаем с нуля
         let bal = parseFloat(localStorage.getItem('m_bal')) || 0.000000;
 
-        // Таймер майнинга
         setInterval(() => {
             bal += 0.000001;
             document.getElementById('balance').innerText = bal.toFixed(6);
@@ -55,8 +53,8 @@
         function deposit() {
             tg.showConfirm("Создать счет на пополнение?", (confirm) => {
                 if (confirm) {
-                    // Твоя ссылка из Crypto Bot
-                    tg.openTelegramLink("https://t.me/send?start=IVps60k0qfC4");
+                    // Твоя НОВАЯ рабочая ссылка
+                    tg.openTelegramLink("http://t.me/send?start=IVubelJ5G9NB");
                 }
             });
         }
