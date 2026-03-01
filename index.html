@@ -30,7 +30,7 @@
         .nav-dot { width: 4px; height: 4px; background: currentColor; border-radius: 50%; margin: 6px auto 0; opacity: 0; }
         .nav-item.active .nav-dot { opacity: 1; }
 
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center; padding: 24px; backdrop-filter: blur(15px); }
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 2000; align-items: center; justify-content: center; padding: 24px; backdrop-filter: blur(15px); }
         .modal-content { background: #111; border: 1px solid #222; border-radius: 28px; padding: 32px; width: 100%; max-width: 340px; text-align: center; }
 
         .hist-item { display: flex; justify-content: space-between; padding: 16px 0; border-bottom: 1px solid #161616; font-size: 13px; font-weight: 500; }
@@ -72,7 +72,7 @@
             <span class="label">Бонусная программа</span>
             <div style="font-size:20px; font-weight:800; margin: 12px 0;">+10% от пополнений</div>
             <p style="color:#ff4444; font-size:11px; font-weight:600; line-height:1.4; opacity:0.8;">
-                Внимание: Реферал будет учтен только после первого запуска майнера.
+                Реферал будет учтен только после запуска майнинга.
             </p>
         </div>
         <button class="btn btn-primary" onclick="inviteFriend()">Пригласить</button>
@@ -95,11 +95,10 @@
         </div>
         <div style="display: flex; flex-direction: column; gap: 12px;">
             <button class="btn btn-accent" onclick="showDepositModal()">Пополнить</button>
-            <button class="btn btn-outline" onclick="showModal('Вывод', 'Минимум 10 USDT. Недостаточно средств.')">Вывести</button>
+            <button class="btn btn-outline" onclick="showModal('Вывод', 'Минимальная сумма: 10 USDT.')">Вывести</button>
             <button class="btn btn-outline" onclick="showHistory()">Мои операции</button>
-            <button class="btn btn-outline" style="margin-top:12px; opacity:0.6;" onclick="showModal('Поддержка', 'Связь с оператором скоро будет доступна.')">Поддержка</button>
+            <button class="btn btn-outline" style="margin-top:12px; opacity:0.6;" onclick="showModal('Поддержка', 'Оператор свяжется с вами в течение 24ч.')">Поддержка</button>
         </div>
-        <div style="text-align: center; margin-top: 20px; color: #333; font-size: 10px;" id="u-id">ID: ...</div>
     </div>
 
     <nav class="nav">
@@ -109,8 +108,8 @@
         <div class="nav-item" onclick="tab('profile')">ПРОФИЛЬ<div class="nav-dot"></div></div>
     </nav>
 
-    <div id="custom-modal" class="modal-overlay" onclick="closeModal()">
-        <div class="modal-content" onclick="event.stopPropagation()">
+    <div id="custom-modal" class="modal-overlay">
+        <div class="modal-content">
             <div id="modal-title" style="font-size:18px; font-weight:800; margin-bottom:12px;"></div>
             <div id="modal-text" style="color:#888; font-size:14px; margin-bottom:24px; line-height:1.5; white-space: pre-line;"></div>
             <button class="btn btn-accent" id="modal-action-btn" style="margin-bottom:12px; display:none;">КУПИТЬ</button>
@@ -132,7 +131,7 @@
         };
 
         const fNames = ["James", "Alex", "Mikhail", "Dmitry", "Elena", "Sarah", "Kevin", "Artem", "Maxim", "Denis"];
-        const lNames = ["_K", "_Dev", "Invest", "Trader", "Sky", "Pro", "Official", "Wealth", "Crypto", "Web3"];
+        const lNames = ["_Invest", "_Trader", "_Pro", "_Sky", "_Crypto", "_Web3"];
         let poolNames = [];
         for(let f of fNames) for(let l of lNames) poolNames.push(f + l);
 
@@ -141,58 +140,65 @@
             let feedHtml = "";
             for(let i=0; i<4; i++) {
                 const s = timeSeed - i;
-                const name = poolNames[(s * 17) % poolNames.length];
+                const name = poolNames[(s * 19) % poolNames.length];
                 const rand = Math.abs(Math.sin(s)) * 100;
-                const amount = (rand > 75 ? 35 + (rand/2.5) : 10 + (rand/3.5)).toFixed(1);
+                const amount = (rand > 80 ? 40 + (rand/2) : 10 + (rand/4)).toFixed(1);
                 feedHtml += `<div class="hist-item" style="opacity: ${1 - (i*0.2)}">
                     <span style="color:#eee">${name}</span>
                     <span style="color:var(--accent)">+${amount} USDT</span>
                 </div>`;
             }
             document.getElementById('payouts').innerHTML = feedHtml;
-            setTimeout(updateLiveFeed, 30000 + Math.random() * 120000);
+            setTimeout(updateLiveFeed, 45000 + Math.random() * 100000);
         }
         updateLiveFeed();
 
+        // ИСПРАВЛЕННАЯ ФУНКЦИЯ МОДАЛКИ
         function showModal(title, text, action = null) {
+            const overlay = document.getElementById('custom-modal');
+            const actBtn = document.getElementById('modal-action-btn');
+            
             document.getElementById('modal-title').innerText = title;
             document.getElementById('modal-text').innerText = text;
-            const actBtn = document.getElementById('modal-action-btn');
+            
             if(action) {
                 actBtn.style.display = 'block';
-                actBtn.onclick = () => {
-                    closeModal(); // ЗАКРЫВАЕМ ОКНО ПЕРЕД ПЕРЕХОДОМ
-                    action();
+                actBtn.onclick = function() {
+                    overlay.style.display = 'none'; // Сначала закрываем
+                    setTimeout(() => { action(); }, 100); // Затем действие
                 };
             } else { actBtn.style.display = 'none'; }
-            document.getElementById('custom-modal').style.display = 'flex';
+            
+            overlay.style.display = 'flex';
         }
+
         function closeModal() { document.getElementById('custom-modal').style.display = 'none'; }
 
         function showDepositModal() {
-            showModal('Пополнение скорости', '1 USDT = +1.25 TH/s\n\nВведите сумму в боте оплаты.', () => {
+            showModal('Пополнение скорости', '1 USDT = +1.25 TH/s\nДля оплаты перейдите в бот.', () => {
                 tg.openTelegramLink("https://t.me/send?start=IVubelJ5G9NB");
             });
         }
 
+        function showHistory() {
+            showModal('История операций', 'Список ваших последних транзакций пуст.');
+        }
+
         function renderQuests() {
-            const qData = [
-                {id:1, t:5, r:1.25}, {id:2, t:10, r:2.5}, {id:3, t:50, r:15.0}, {id:4, t:100, r:25.0}
-            ];
+            const qData = [{id:1, t:5, r:1.25}, {id:2, t:10, r:2.5}, {id:3, t:50, r:15.0}, {id:4, t:100, r:25.0}];
             document.getElementById('quest-list').innerHTML = qData.map(q => {
                 const done = data.quests.includes(q.id);
                 const prog = data.refs > q.t ? q.t : data.refs;
                 return `<div class="card" style="display:flex; justify-content:space-between; align-items:center;">
-                    <div><b style="font-size:15px;">Пригласить друга</b><br><span style="color:var(--accent); font-size:12px;">+${q.r} TH/s мощности</span></div>
+                    <div><b style="font-size:15px;">Пригласить друга</b><br><span style="color:var(--accent); font-size:12px;">+${q.r} TH/s</span></div>
                     <button class="btn btn-primary" style="width:auto; padding:12px 20px; font-size:11px;" ${data.refs < q.t || done ? 'disabled' : ''}>${done?'ГОТОВО': prog+'/'+q.t}</button>
                 </div>`;
             }).join('');
         }
 
         setInterval(() => {
-            const now = Date.now();
-            if (now < data.miningEnd) {
-                let diff = data.miningEnd - now;
+            if (Date.now() < data.miningEnd) {
+                let diff = data.miningEnd - Date.now();
                 let h = Math.floor(diff/3600000), m = Math.floor((diff%3600000)/60000), s = Math.floor((diff%60000)/1000);
                 document.getElementById('timer').innerText = `${h}:${m<10?'0':''}${m}:${s<10?'0':''}${s}`;
                 data.mBal += (data.power * 0.0000014);
@@ -202,10 +208,10 @@
         }, 1000);
 
         function showCollectModal() {
-            if(data.mBal < 1) return showModal('Сбор', 'Нужно накопить минимум 1.00 USDT');
+            if(data.mBal < 1) return showModal('Сбор', 'Нужно накопить 1.00 USDT');
             data.wBal += data.mBal; data.mBal = 0; updateUI();
             localStorage.setItem('w_bal', data.wBal);
-            showModal('Успешно', 'Прибыль зачислена!');
+            showModal('Успех', 'Собрано на баланс!');
         }
 
         function tab(id) {
@@ -229,7 +235,6 @@
             document.getElementById('p-val').innerText = data.power.toFixed(2);
             document.getElementById('daily-income').innerText = (data.power * 0.096).toFixed(2);
             document.getElementById('ref-count').innerText = data.refs;
-            if(tg.initDataUnsafe.user) document.getElementById('u-id').innerText = "ID: " + tg.initDataUnsafe.user.id;
         }
         updateUI();
     </script>
