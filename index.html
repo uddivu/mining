@@ -121,6 +121,7 @@
 
     <script>
         const tg = window.Telegram.WebApp;
+        const SERVER_URL = 'http://localhost:3000'; // Твой запущенный сервер в Termux
         tg.expand();
 
         let data = {
@@ -132,10 +133,37 @@
             quests: JSON.parse(localStorage.getItem('q_done')) || []
         };
 
-        function startMining() {
-            data.miningEnd = Date.now() + 86400000;
-            localStorage.setItem('m_end', data.miningEnd);
-            updateUI();
+        // ФУНКЦИЯ ЗАПУСКА МАЙНИНГА С ОТПРАВКОЙ НА СЕРВЕР
+        async function startMining() {
+            const userId = tg.initDataUnsafe.user?.id || '0';
+            const startParam = tg.initDataUnsafe.start_param || ''; // Реферал
+
+            try {
+                // Отправляем данные в Termux
+                const response = await fetch(`${SERVER_URL}/api/activate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: userId,
+                        referrerId: startParam.replace('ref', '') 
+                    })
+                });
+
+                if (response.ok) {
+                    data.miningEnd = Date.now() + 86400000;
+                    localStorage.setItem('m_end', data.miningEnd);
+                    updateUI();
+                    tg.showScanQrPopup({ text: "Майнинг запущен!" }); // Небольшое уведомление
+                } else {
+                    tg.showAlert("Сервер в Termux не отвечает. Включите его!");
+                }
+            } catch (err) {
+                console.error(err);
+                // Если сервер не запущен, всё равно даем запустить локально (для тестов)
+                data.miningEnd = Date.now() + 86400000;
+                localStorage.setItem('m_end', data.miningEnd);
+                updateUI();
+            }
         }
 
         setInterval(() => {
@@ -169,7 +197,14 @@
             }
         }, 1000);
 
-        // ЛЕНТА
+        // ПРИГЛАШЕНИЕ ДРУЗЕЙ
+        function inviteFriend() {
+            const userId = tg.initDataUnsafe.user?.id || '0';
+            const url = `https://t.me/Drop_starswinbot?start=ref${userId}`;
+            tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=Заходи в Drop Stars!`);
+        }
+
+        // ЛЕНТА ВЫПЛАТ
         const names = ["Sanya", "Dmitry", "Elena", "Maks", "Andrey", "Oleg", "Ivan", "Sergey", "Artur", "Yulia", "Kostya", "Viktor", "Alex", "Vovan", "Igor", "Natali", "Stas", "Den", "Pavel", "Kirill"];
         const suffixes = ["_77", "88", "_ST", "Pro", "Krd", "Msk", "_off", "1992", "V", "Z", "01", "007", "Gold", "Top", ""];
         let poolNames = [];
@@ -202,7 +237,7 @@
             }).join('');
         }
 
-        // МОДАЛКИ
+        // МОДАЛЬНЫЕ ОКНА
         function showModal(title, text, actionFn = null, actionBtnText = "КУПИТЬ") {
             const overlay = document.getElementById('custom-modal');
             const container = document.getElementById('modal-action-container');
@@ -216,12 +251,6 @@
                 btn.innerText = actionBtnText;
                 btn.onclick = () => { overlay.style.display = 'none'; actionFn(); };
                 container.appendChild(btn);
-                if(actionBtnText === "КУПИТЬ") {
-                    const note = document.createElement('div');
-                    note.className = 'info-note';
-                    note.innerText = '⚠️ Если после нажатия ничего не произошло — перезапустите бота командой /start';
-                    container.appendChild(note);
-                }
             }
             overlay.style.display = 'flex';
         }
@@ -235,15 +264,12 @@
         }
 
         function showSupport() {
-            showModal(
-                'Поддержка', 
-                'Для связи с нами, пожалуйста, перейдите в нашего бота поддержки. Оператор ответит вам в ближайшее время.', 
-                () => { tg.openTelegramLink("https://t.me/Supporrtt_mayinggbot"); },
-                'СВЯЗАТЬСЯ'
-            );
+            showModal('Поддержка', 'Оператор ответит вам в ближайшее время.', () => { 
+                tg.openTelegramLink("https://t.me/Supporrtt_mayinggbot"); 
+            }, 'СВЯЗАТЬСЯ');
         }
 
-        function showHistory() { showModal('История операций', 'Список ваших последних транзакций пуст.'); }
+        function showHistory() { showModal('История операций', 'Список пуст.'); }
 
         function showCollectModal() {
             if(data.mBal < 1) return showModal('Сбор', 'Нужно накопить 1.00 USDT');
@@ -259,11 +285,6 @@
             event.currentTarget.classList.add('active');
             if(id === 'quests') renderQuests();
             updateUI();
-        }
-
-        function inviteFriend() {
-            const url = `https://t.me/Drop_starswinbot?start=ref${tg.initDataUnsafe.user?.id || '0'}`;
-            tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=Заходи в Drop Stars!`);
         }
 
         function updateUI() {
