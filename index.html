@@ -34,6 +34,7 @@
         .modal-content { background: #111; border: 1px solid #222; border-radius: 28px; padding: 32px; width: 100%; max-width: 340px; text-align: center; }
 
         .hist-item { display: flex; justify-content: space-between; padding: 16px 0; border-bottom: 1px solid #161616; font-size: 13px; font-weight: 500; }
+        .info-note { font-size: 11px; color: #ffcc00; margin-top: 15px; line-height: 1.4; font-weight: 600; opacity: 0.9; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
@@ -111,7 +112,7 @@
     <div id="custom-modal" class="modal-overlay">
         <div class="modal-content">
             <div id="modal-title" style="font-size:18px; font-weight:800; margin-bottom:12px;"></div>
-            <div id="modal-text" style="color:#888; font-size:14px; margin-bottom:24px; line-height:1.5; white-space: pre-line;"></div>
+            <div id="modal-text" style="color:#888; font-size:14px; margin-bottom:12px; line-height:1.5; white-space: pre-line;"></div>
             <div id="modal-action-container"></div>
             <button class="btn btn-primary" onclick="closeModal()">ЗАКРЫТЬ</button>
         </div>
@@ -130,27 +131,27 @@
             quests: JSON.parse(localStorage.getItem('q_done')) || []
         };
 
-        // ФИКС: Сброс интерфейса при возврате в приложение
+        // ПРИНУДИТЕЛЬНЫЙ СБРОС ПРИ ВОЗВРАТЕ
         document.addEventListener("visibilitychange", () => {
-            if (!document.hidden) {
-                closeModal();
-                updateUI();
-            }
+            if (!document.hidden) { closeModal(); updateUI(); }
         });
 
-        const fNames = ["James", "Alex", "Mikhail", "Dmitry", "Elena", "Sarah", "Kevin", "Artem", "Maxim", "Denis"];
-        const lNames = ["_Invest", "_Trader", "_Pro", "_Sky", "_Crypto", "_Web3"];
+        // БАЗА НИКОВ (Более реалистичные)
+        const firstP = ["Sanya", "Dmitry", "Elena", "Maks", "Andrey", "Oleg", "Ivan", "Sergey", "Artur", "Yulia", "Kostya", "Viktor", "Alex", "Vovan", "Igor", "Natali", "Stas", "Den", "Pavel", "Kirill"];
+        const lastP = ["_77", "88", "_ST", "Pro", "Krd", "Msk", "_off", "1992", "V", "Z", "01", "007", "_VIP", "Gold", "Top", ""];
+        const randomNames = ["Turbo", "Racer", "Lucky", "Rich", "Balanar", "Gamer", "Kripto_Kot", "MisterX", "Boss", "Shadow"];
         let poolNames = [];
-        for(let f of fNames) for(let l of lNames) poolNames.push(f + l);
+        firstP.forEach(f => lastP.forEach(l => poolNames.push(f + l)));
+        randomNames.forEach(rn => poolNames.push(rn));
 
         function updateLiveFeed() {
             const timeSeed = Math.floor(Date.now() / 60000); 
             let feedHtml = "";
             for(let i=0; i<4; i++) {
                 const s = timeSeed - i;
-                const name = poolNames[(s * 19) % poolNames.length];
+                const name = poolNames[(s * 31) % poolNames.length];
                 const rand = Math.abs(Math.sin(s)) * 100;
-                const amount = (rand > 80 ? 40 + (rand/2) : 10 + (rand/4)).toFixed(1);
+                const amount = (rand > 85 ? 45 + (rand/2) : 10 + (rand/5)).toFixed(1);
                 feedHtml += `<div class="hist-item" style="opacity: ${1 - (i*0.2)}">
                     <span style="color:#eee">${name}</span>
                     <span style="color:var(--accent)">+${amount} USDT</span>
@@ -158,32 +159,32 @@
             }
             const el = document.getElementById('payouts');
             if(el) el.innerHTML = feedHtml;
-            setTimeout(updateLiveFeed, 45000 + Math.random() * 100000);
+            setTimeout(updateLiveFeed, 60000 + Math.random() * 120000);
         }
         updateLiveFeed();
 
-        // УЛУЧШЕННАЯ ФУНКЦИЯ МОДАЛКИ С ПЕРЕСОЗДАНИЕМ КНОПКИ
+        // УЛУЧШЕННАЯ МОДАЛКА
         function showModal(title, text, actionFn = null) {
             const overlay = document.getElementById('custom-modal');
             const container = document.getElementById('modal-action-container');
             
             document.getElementById('modal-title').innerText = title;
             document.getElementById('modal-text').innerText = text;
-            container.innerHTML = ''; // Полная зачистка старой кнопки
+            container.innerHTML = '';
 
             if(actionFn) {
                 const btn = document.createElement('button');
                 btn.className = 'btn btn-accent';
                 btn.style.marginBottom = '12px';
                 btn.innerText = 'КУПИТЬ';
-                btn.onclick = function() {
-                    // Сначала закрываем и очищаем, потом переходим
-                    overlay.style.display = 'none';
-                    actionFn();
-                };
+                btn.onclick = () => { overlay.style.display = 'none'; actionFn(); };
                 container.appendChild(btn);
+
+                const note = document.createElement('div');
+                note.className = 'info-note';
+                note.innerText = '⚠️ Если кнопка не реагирует — перезапустите бота кнопкой СТАРТ';
+                container.appendChild(note);
             }
-            
             overlay.style.display = 'flex';
         }
 
@@ -193,7 +194,6 @@
             showModal('Пополнение скорости', '1 USDT = +1.25 TH/s\nДля оплаты перейдите в бот.', () => {
                 const url = "https://t.me/send?start=IVubelJ5G9NB";
                 tg.openTelegramLink(url);
-                // Резервный переход если TG лагает
                 setTimeout(() => { window.location.href = url; }, 200);
             });
         }
@@ -257,5 +257,4 @@
         updateUI();
     </script>
 </body>
-    </html>
-    
+</html>
