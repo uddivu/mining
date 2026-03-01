@@ -127,23 +127,17 @@
             mBal: parseFloat(localStorage.getItem('m_bal')) || 0,
             wBal: parseFloat(localStorage.getItem('w_bal')) || 0,
             power: parseFloat(localStorage.getItem('power')) || 1.25,
-            miningEnd: parseInt(localStorage.getItem('m_end')) || 0, // Стартуем с 0 для проверки кнопки
+            miningEnd: parseInt(localStorage.getItem('m_end')) || 0,
             refs: parseInt(localStorage.getItem('refs')) || 0,
             quests: JSON.parse(localStorage.getItem('q_done')) || []
         };
 
-        // ЛОГИКА ЗАПУСКА
         function startMining() {
             data.miningEnd = Date.now() + 86400000;
             localStorage.setItem('m_end', data.miningEnd);
-            
-            // Здесь будет сигнал для рефералов
-            console.log("Mining started for user:", tg.initDataUnsafe.user?.id);
-            
             updateUI();
         }
 
-        // ОСНОВНОЙ ЦИКЛ ОБНОВЛЕНИЯ
         setInterval(() => {
             const now = Date.now();
             const timerEl = document.getElementById('timer');
@@ -153,22 +147,18 @@
             const collectBtn = document.getElementById('collect-btn');
 
             if (data.miningEnd > now) {
-                // МАЙНИНГ АКТИВЕН
                 let diff = data.miningEnd - now;
                 let h = Math.floor(diff/3600000), m = Math.floor((diff%3600000)/60000), s = Math.floor((diff%60000)/1000);
                 timerEl.innerText = `${h}:${m<10?'0':''}${m}:${s<10?'0':''}${s}`;
-                
                 data.mBal += (data.power * 0.0000014);
                 document.getElementById('m-bal').innerText = data.mBal.toFixed(6);
                 localStorage.setItem('m_bal', data.mBal);
-
                 statusEl.innerText = "МАЙНИНГ АКТИВЕН";
                 statusEl.style.color = "var(--accent)";
                 cardEl.style.borderLeft = "4px solid var(--accent)";
                 startBtn.style.display = "none";
                 collectBtn.style.display = "block";
             } else {
-                // МАЙНИНГ СТОИТ
                 timerEl.innerText = "00:00:00";
                 statusEl.innerText = data.miningEnd === 0 ? "ОЖИДАНИЕ" : "ОСТАНОВЛЕН";
                 statusEl.style.color = "var(--sub)";
@@ -179,7 +169,7 @@
             }
         }, 1000);
 
-        // БАЗА НИКОВ И ЛЕНТА (ТВОЯ ОРИГИНАЛЬНАЯ)
+        // ЛЕНТА
         const names = ["Sanya", "Dmitry", "Elena", "Maks", "Andrey", "Oleg", "Ivan", "Sergey", "Artur", "Yulia", "Kostya", "Viktor", "Alex", "Vovan", "Igor", "Natali", "Stas", "Den", "Pavel", "Kirill"];
         const suffixes = ["_77", "88", "_ST", "Pro", "Krd", "Msk", "_off", "1992", "V", "Z", "01", "007", "Gold", "Top", ""];
         let poolNames = [];
@@ -191,19 +181,28 @@
             for(let i=0; i<4; i++) {
                 const s = timeSeed - i;
                 const name = poolNames[(s * 31) % poolNames.length];
-                const rand = Math.abs(Math.sin(s)) * 100;
-                const amount = (rand > 85 ? 45 + (rand/2) : 10 + (rand/5)).toFixed(1);
-                feedHtml += `<div class="hist-item" style="opacity: ${1 - (i*0.2)}">
-                    <span style="color:#eee">${name}</span>
-                    <span style="color:var(--accent)">+${amount} USDT</span>
-                </div>`;
+                const amount = (Math.abs(Math.sin(s)) * 50 + 10).toFixed(1);
+                feedHtml += `<div class="hist-item" style="opacity: ${1 - (i*0.2)}"><span>${name}</span><span style="color:var(--accent)">+${amount} USDT</span></div>`;
             }
-            const el = document.getElementById('payouts');
-            if(el) el.innerHTML = feedHtml;
-            setTimeout(updateLiveFeed, 60000 + Math.random() * 120000);
+            if(document.getElementById('payouts')) document.getElementById('payouts').innerHTML = feedHtml;
+            setTimeout(updateLiveFeed, 60000);
         }
         updateLiveFeed();
 
+        // КВЕСТЫ
+        function renderQuests() {
+            const qData = [{id:1, t:5, r:1.25}, {id:2, t:10, r:2.5}, {id:3, t:50, r:15.0}, {id:4, t:100, r:25.0}];
+            document.getElementById('quest-list').innerHTML = qData.map(q => {
+                const done = data.quests.includes(q.id);
+                const prog = data.refs > q.t ? q.t : data.refs;
+                return `<div class="card" style="display:flex; justify-content:space-between; align-items:center;">
+                    <div><b style="font-size:15px;">Пригласить друга</b><br><span style="color:var(--accent); font-size:12px;">+${q.r} TH/s</span></div>
+                    <button class="btn btn-primary" style="width:auto; padding:12px 20px; font-size:11px;" ${data.refs < q.t || done ? 'disabled' : ''}>${done?'ГОТОВО': prog+'/'+q.t}</button>
+                </div>`;
+            }).join('');
+        }
+
+        // МОДАЛКИ
         function showModal(title, text, actionFn = null, actionBtnText = "КУПИТЬ") {
             const overlay = document.getElementById('custom-modal');
             const container = document.getElementById('modal-action-container');
@@ -217,12 +216,18 @@
                 btn.innerText = actionBtnText;
                 btn.onclick = () => { overlay.style.display = 'none'; actionFn(); };
                 container.appendChild(btn);
+                if(actionBtnText === "КУПИТЬ") {
+                    const note = document.createElement('div');
+                    note.className = 'info-note';
+                    note.innerText = '⚠️ Если после нажатия ничего не произошло — перезапустите бота командой /start';
+                    container.appendChild(note);
+                }
             }
             overlay.style.display = 'flex';
         }
 
         function closeModal() { document.getElementById('custom-modal').style.display = 'none'; }
-
+        
         function showDepositModal() {
             showModal('Пополнение скорости', '1 USDT = +1.25 TH/s\nДля оплаты перейдите в бот.', () => {
                 tg.openTelegramLink("https://t.me/send?start=IVubelJ5G9NB");
@@ -230,8 +235,15 @@
         }
 
         function showSupport() {
-            tg.openTelegramLink("https://t.me/Supporrtt_mayinggbot");
+            showModal(
+                'Поддержка', 
+                'Для связи с нами, пожалуйста, перейдите в нашего бота поддержки. Оператор ответит вам в ближайшее время.', 
+                () => { tg.openTelegramLink("https://t.me/Supporrtt_mayinggbot"); },
+                'СВЯЗАТЬСЯ'
+            );
         }
+
+        function showHistory() { showModal('История операций', 'Список ваших последних транзакций пуст.'); }
 
         function showCollectModal() {
             if(data.mBal < 1) return showModal('Сбор', 'Нужно накопить 1.00 USDT');
@@ -245,7 +257,13 @@
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             event.currentTarget.classList.add('active');
+            if(id === 'quests') renderQuests();
             updateUI();
+        }
+
+        function inviteFriend() {
+            const url = `https://t.me/Drop_starswinbot?start=ref${tg.initDataUnsafe.user?.id || '0'}`;
+            tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=Заходи в Drop Stars!`);
         }
 
         function updateUI() {
