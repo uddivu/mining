@@ -98,7 +98,7 @@
             <button class="btn btn-accent" onclick="showDepositModal()">Пополнить</button>
             <button class="btn btn-outline" onclick="showModal('Вывод', 'Минимальная сумма: 10 USDT.')">Вывести</button>
             <button class="btn btn-outline" onclick="showHistory()">Мои операции</button>
-            <button class="btn btn-outline" style="margin-top:12px; opacity:0.6;" onclick="showModal('Поддержка', 'Оператор свяжется с вами в течение 24ч.')">Поддержка</button>
+            <button class="btn btn-outline" style="margin-top:12px; opacity:0.6;" onclick="showSupport()">Поддержка</button>
         </div>
     </div>
 
@@ -131,18 +131,11 @@
             quests: JSON.parse(localStorage.getItem('q_done')) || []
         };
 
-        // ПРИНУДИТЕЛЬНЫЙ СБРОС ПРИ ВОЗВРАТЕ
-        document.addEventListener("visibilitychange", () => {
-            if (!document.hidden) { closeModal(); updateUI(); }
-        });
-
-        // БАЗА НИКОВ (Более реалистичные)
-        const firstP = ["Sanya", "Dmitry", "Elena", "Maks", "Andrey", "Oleg", "Ivan", "Sergey", "Artur", "Yulia", "Kostya", "Viktor", "Alex", "Vovan", "Igor", "Natali", "Stas", "Den", "Pavel", "Kirill"];
-        const lastP = ["_77", "88", "_ST", "Pro", "Krd", "Msk", "_off", "1992", "V", "Z", "01", "007", "_VIP", "Gold", "Top", ""];
-        const randomNames = ["Turbo", "Racer", "Lucky", "Rich", "Balanar", "Gamer", "Kripto_Kot", "MisterX", "Boss", "Shadow"];
+        // БАЗА НИКОВ (Более естественные)
+        const names = ["Sanya", "Dmitry", "Elena", "Maks", "Andrey", "Oleg", "Ivan", "Sergey", "Artur", "Yulia", "Kostya", "Viktor", "Alex", "Vovan", "Igor", "Natali", "Stas", "Den", "Pavel", "Kirill"];
+        const suffixes = ["_77", "88", "_ST", "Pro", "Krd", "Msk", "_off", "1992", "V", "Z", "01", "007", "Gold", "Top", ""];
         let poolNames = [];
-        firstP.forEach(f => lastP.forEach(l => poolNames.push(f + l)));
-        randomNames.forEach(rn => poolNames.push(rn));
+        names.forEach(n => suffixes.forEach(s => poolNames.push(n + s)));
 
         function updateLiveFeed() {
             const timeSeed = Math.floor(Date.now() / 60000); 
@@ -163,11 +156,10 @@
         }
         updateLiveFeed();
 
-        // УЛУЧШЕННАЯ МОДАЛКА
-        function showModal(title, text, actionFn = null) {
+        // УНИВЕРСАЛЬНАЯ МОДАЛКА
+        function showModal(title, text, actionFn = null, actionBtnText = "КУПИТЬ") {
             const overlay = document.getElementById('custom-modal');
             const container = document.getElementById('modal-action-container');
-            
             document.getElementById('modal-title').innerText = title;
             document.getElementById('modal-text').innerText = text;
             container.innerHTML = '';
@@ -176,20 +168,24 @@
                 const btn = document.createElement('button');
                 btn.className = 'btn btn-accent';
                 btn.style.marginBottom = '12px';
-                btn.innerText = 'КУПИТЬ';
+                btn.innerText = actionBtnText;
                 btn.onclick = () => { overlay.style.display = 'none'; actionFn(); };
                 container.appendChild(btn);
 
-                const note = document.createElement('div');
-                note.className = 'info-note';
-                note.innerText = '⚠️ Если кнопка не реагирует — перезапустите бота кнопкой СТАРТ';
-                container.appendChild(note);
+                // Добавляем инфо-плашку только для покупки
+                if(actionBtnText === "КУПИТЬ") {
+                    const note = document.createElement('div');
+                    note.className = 'info-note';
+                    note.innerText = '⚠️ Если после нажатия ничего не произошло — перезапустите бота командой /start';
+                    container.appendChild(note);
+                }
             }
             overlay.style.display = 'flex';
         }
 
         function closeModal() { document.getElementById('custom-modal').style.display = 'none'; }
 
+        // ПОПОЛНЕНИЕ
         function showDepositModal() {
             showModal('Пополнение скорости', '1 USDT = +1.25 TH/s\nДля оплаты перейдите в бот.', () => {
                 const url = "https://t.me/send?start=IVubelJ5G9NB";
@@ -198,9 +194,18 @@
             });
         }
 
-        function showHistory() {
-            showModal('История операций', 'Список ваших последних транзакций пуст.');
+        // ПОДДЕРЖКА (Обновлено по твоей просьбе)
+        function showSupport() {
+            const supportBot = "https://t.me/Supporrtt_mayinggbot";
+            showModal(
+                'Поддержка', 
+                'Для связи с нами, пожалуйста, перейдите в нашего бота поддержки. Оператор ответит вам в ближайшее время.', 
+                () => { tg.openTelegramLink(supportBot); },
+                'СВЯЗАТЬСЯ'
+            );
         }
+
+        function showHistory() { showModal('История операций', 'Список ваших последних транзакций пуст.'); }
 
         function renderQuests() {
             const qData = [{id:1, t:5, r:1.25}, {id:2, t:10, r:2.5}, {id:3, t:50, r:15.0}, {id:4, t:100, r:25.0}];
@@ -214,6 +219,7 @@
             }).join('');
         }
 
+        // МАЙНИНГ ЛОГИКА
         setInterval(() => {
             if (Date.now() < data.miningEnd) {
                 let diff = data.miningEnd - Date.now();
